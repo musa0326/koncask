@@ -2,7 +2,93 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Futbol Takip Sistemi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futbol Okulu Yönetim Paneli</title>
+    <style>
+        :root {
+            --primary: #1e293b;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #334155;
+            --border: #e2e8f0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--primary);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        input, select {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+        input:focus, select:focus {
+            border-color: var(--accent);
+        }
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.9; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th { background: #f1f5f9; font-weight: 600; }
+        .btn-delete {
+            background: var(--danger);
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
@@ -19,11 +105,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Şifre kontrolü
         const APP_PASSWORD = "1234";
-        
+
         function checkPassword() {
-            let pass = prompt("Lütfen şifreyi girin:");
+            let pass = prompt("Lütfen yönetici şifresini girin:");
             if (pass !== APP_PASSWORD) {
                 alert("Hatalı şifre!");
                 location.reload();
@@ -32,37 +117,101 @@
             }
         }
 
-        // Verileri ekrana basma
         function renderUI() {
             document.body.innerHTML = `
-                <h1>Futbolcu Takip Paneli</h1>
-                <input id="ad" placeholder="Ad Soyad">
-                <button onclick="ekle()">Ekle</button>
-                <ul id="liste"></ul>
+                <div class="container">
+                    <header>
+                        <h2>⚽ Futbol Okulu Yönetim Paneli</h2>
+                        <span id="status" style="font-size: 13px; background: #10b981; padding: 4px 8px; border-radius: 4px;">Bağlı (Ortak)</span>
+                    </header>
+
+                    <div class="card">
+                        <h3>Yeni Sporcu Ekle</h3>
+                        <div class="form-grid">
+                            <input type="text" id="adSoyad" placeholder="Ad Soyad">
+                            <input type="number" id="yas" placeholder="Yaş">
+                            <select id="mevki">
+                                <option value="">Mevki Seçin</option>
+                                <option value="Kaleci">Kaleci</option>
+                                <option value="Defans">Defans</option>
+                                <option value="Orta Saha">Orta Saha</option>
+                                <option value="Forvet">Forvet</option>
+                            </select>
+                        </div>
+                        <button onclick="futbolcuEkle()">Sporcuyu Kaydet</button>
+                    </div>
+
+                    <div class="card">
+                        <h3>Kayıtlı Sporcular</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ad Soyad</th>
+                                    <th>Yaş</th>
+                                    <th>Mevki</th>
+                                    <th>İşlem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sporcuListesi">
+                                <tr><td colspan="4" style="text-align: center;">Yükleniyor...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             `;
-            
+
             onSnapshot(collection(db, "sporcular"), (snapshot) => {
-                const liste = document.getElementById("liste");
-                liste.innerHTML = "";
-                snapshot.forEach((doc) => {
-                    liste.innerHTML += `<li>${doc.data().ad} <button onclick="sil('${doc.id}')">Sil</button></li>`;
+                const tbody = document.getElementById("sporcuListesi");
+                tbody.innerHTML = "";
+                
+                if (snapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center;">Henüz kayıtlı sporcu yok.</td></tr>`;
+                    return;
+                }
+
+                snapshot.forEach((docSnap) => {
+                    let veri = docSnap.data();
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${veri.adSoyad || '-'}</td>
+                            <td>${veri.yas || '-'}</td>
+                            <td>${veri.mevki || '-'}</td>
+                            <td><button class="btn-delete" onclick="futbolcuSil('${docSnap.id}')">Sil</button></td>
+                        </tr>
+                    `;
                 });
             });
         }
 
-        window.ekle = async () => {
-            const ad = document.getElementById("ad").value;
-            if(ad) await addDoc(collection(db, "sporcular"), { ad: ad });
+        window.futbolcuEkle = async () => {
+            const adSoyad = document.getElementById("adSoyad").value;
+            const yas = document.getElementById("yas").value;
+            const mevki = document.getElementById("mevki").value;
+
+            if (!adSoyad) {
+                alert("Lütfen en azından ad soyad girin!");
+                return;
+            }
+
+            await addDoc(collection(db, "sporcular"), {
+                adSoyad: adSoyad,
+                yas: yas,
+                mevki: mevki,
+                tarih: new Date().toISOString()
+            });
+
+            document.getElementById("adSoyad").value = "";
+            document.getElementById("yas").value = "";
+            document.getElementById("mevki").value = "";
         };
 
-        window.sil = async (id) => {
-            await deleteDoc(doc(db, "sporcular", id));
+        window.futbolcuSil = async (id) => {
+            if (confirm("Bu sporcuyu silmek istediğinize emin misiniz?")) {
+                await deleteDoc(doc(db, "sporcular", id));
+            }
         };
 
         checkPassword();
     </script>
-</head>
-<body>
-    <p>Yükleniyor...</p>
 </body>
 </html>
