@@ -5,7 +5,7 @@
     <title>Futbol Okulu Yönetim Paneli</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; padding: 20px; color: #334155; }
-        .container { max-width: 900px; margin: auto; }
+        .container { max-width: 950px; margin: auto; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
         .tab-btn { padding: 10px 20px; cursor: pointer; border: none; border-radius: 6px; background: #e2e8f0; font-weight: bold; }
@@ -18,7 +18,7 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
         th { background: #f1f5f9; }
-        .btn-delete { background: #ef4444; padding: 6px 12px; font-size: 12px; }
+        .btn-delete { background: #ef4444; padding: 6px 12px; font-size: 12px; color: white; border: none; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -37,47 +37,37 @@
     <!-- Sporcu Kayıt Bölümü -->
     <div id="kayit" class="section active card">
         <h3>Yeni Sporcu Ekle</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px;">
-            <select id="tur">
-                <option value="Bireysel">Bireysel</option>
-                <option value="Futbol Okulu">Futbol Okulu</option>
-            </select>
-            <input type="text" id="ad" placeholder="Ad Soyad">
-            <input type="number" id="yas" placeholder="Yaş">
-            <input type="text" id="telefon" placeholder="İletişim Numarası">
+        <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px;">
+            <select id="tur"><option value="Bireysel">Bireysel</option><option value="Futbol Okulu">Futbol Okulu</option></select>
+            <input type="text" id="ad" placeholder="Ad Soyad" style="width: 200px;">
+            <input type="number" id="yas" placeholder="Yaş" style="width: 60px;">
+            <input type="tel" id="telefon" placeholder="İletişim Numarası" style="width: 150px;">
             <button onclick="kaydet()">Sporcuyu Kaydet</button>
         </div>
         
-        <h3>Kayıtlı Sporcular</h3>
-        <table>
+        <table border="1">
             <thead>
                 <tr>
-                    <th>Kayıt Türü</th>
+                    <th>Tür</th>
                     <th>Ad Soyad</th>
                     <th>Yaş</th>
                     <th>İletişim</th>
                     <th>İşlem</th>
                 </tr>
             </thead>
-            <tbody id="liste">
-                <tr><td colspan="5" style="text-align: center;">Yükleniyor...</td></tr>
-            </tbody>
+            <tbody id="liste"></tbody>
         </table>
     </div>
 
     <!-- Antrenman Çizelgesi Bölümü -->
     <div id="antrenman" class="section card">
         <h3>Antrenman Çizelgesi</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px;">
             <input type="date" id="tarih">
-            <input type="text" id="antNot" placeholder="Antrenman Detayı / Notu" style="flex: 1; min-width: 200px;">
+            <input type="text" id="antNot" placeholder="Antrenman Notu" style="flex: 1; min-width: 200px;">
             <button onclick="antEkle()">Antrenman Ekle</button>
         </div>
-
-        <h3>Planlanan Antrenmanlar</h3>
-        <ul id="antListe" style="list-style-type: none; padding: 0;">
-            <li style="padding: 8px; color: #666;">Yükleniyor...</li>
-        </ul>
+        <ul id="antListe" style="list-style-type: none; padding: 0;"></ul>
     </div>
 </div>
 
@@ -103,79 +93,41 @@
         event.target.classList.add('active');
     };
 
-    // Sporcu Kayıt Verilerini Çek ve Listele
+    // Sporcu Verileri
     onSnapshot(collection(db, "sporcular"), (s) => {
         let h = "";
-        if (s.empty) {
-            h = `<tr><td colspan="5" style="text-align: center;">Henüz kayıtlı sporcu yok.</td></tr>`;
-        } else {
-            s.forEach(d => {
-                let veri = d.data();
-                h += `<tr>
-                    <td>${veri.tur || '-'}</td>
-                    <td>${veri.ad || '-'}</td>
-                    <td>${veri.yas || '-'}</td>
-                    <td>${veri.telefon || '-'}</td>
-                    <td><button class="btn-delete" onclick="sil('${d.id}', 'sporcular')">Sil</button></td>
-                </tr>`;
-            });
-        }
+        s.forEach(d => {
+            let v = d.data();
+            h += `<tr><td>${v.tur||''}</td><td>${v.ad||''}</td><td>${v.yas||''}</td><td>${v.telefon||''}</td><td><button class="btn-delete" onclick="sil('${d.id}', 'sporcular')">Sil</button></td></tr>`;
+        });
         document.getElementById("liste").innerHTML = h;
     });
 
     window.kaydet = async () => {
-        const tur = document.getElementById("tur").value;
-        const ad = document.getElementById("ad").value;
-        const yas = document.getElementById("yas").value;
-        const telefon = document.getElementById("telefon").value;
-
-        if (!ad) {
-            alert("Lütfen ad soyad giriniz!");
-            return;
-        }
-
-        await addDoc(collection(db, "sporcular"), { tur, ad, yas, telefon });
-        document.getElementById("ad").value = "";
-        document.getElementById("yas").value = "";
-        document.getElementById("telefon").value = "";
+        await addDoc(collection(db, "sporcular"), { 
+            tur: document.getElementById("tur").value, 
+            ad: document.getElementById("ad").value, 
+            yas: document.getElementById("yas").value, 
+            telefon: document.getElementById("telefon").value 
+        });
+        alert("Kayıt Başarılı!");
     };
 
-    // Antrenman Çizelgesi Verilerini Çek ve Listele
+    // Antrenman
     onSnapshot(collection(db, "antrenman"), (s) => {
         let h = "";
-        if (s.empty) {
-            h = `<li style="padding: 8px; color: #666;">Henüz planlanmış antrenman yok.</li>`;
-        } else {
-            s.forEach(d => {
-                let veri = d.data();
-                h += `<li style="background: #f1f5f9; padding: 10px; margin-bottom: 5px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
-                    <span>📅 <b>${veri.tarih || 'Tarihsiz'}</b> - ${veri.not || ''}</span>
-                    <button class="btn-delete" onclick="sil('${d.id}', 'antrenman')">Sil</button>
-                </li>`;
-            });
-        }
+        s.forEach(d => {
+            let v = d.data();
+            h += `<li style="padding:10px; border-bottom:1px solid #eee;">📅 ${v.tarih} - ${v.not} <button class="btn-delete" onclick="sil('${d.id}', 'antrenman')">Sil</button></li>`;
+        });
         document.getElementById("antListe").innerHTML = h;
     });
 
     window.antEkle = async () => {
-        const tarih = document.getElementById("tarih").value;
-        const not = document.getElementById("antNot").value;
-
-        if (!tarih || !not) {
-            alert("Lütfen tarih ve antrenman detayını giriniz!");
-            return;
-        }
-
-        await addDoc(collection(db, "antrenman"), { tarih, not });
-        document.getElementById("tarih").value = "";
-        document.getElementById("antNot").value = "";
+        await addDoc(collection(db, "antrenman"), { tarih: document.getElementById("tarih").value, not: document.getElementById("antNot").value });
     };
 
-    window.sil = async (id, col) => {
-        if (confirm("Silmek istediğinize emin misiniz?")) {
-            await deleteDoc(doc(db, col, id));
-        }
-    };
+    window.sil = async (id, col) => { if(confirm("Emin misiniz?")) await deleteDoc(doc(db, col, id)); };
 </script>
 </body>
 </html>
