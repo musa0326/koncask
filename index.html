@@ -14,7 +14,6 @@
         .section.active { display: block; }
         input, select, button { padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin: 5px; }
         button { background: #10b981; color: white; border: none; cursor: pointer; font-weight: bold; }
-        button:hover { opacity: 0.9; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
         th { background: #f1f5f9; }
@@ -30,61 +29,53 @@
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('kayit')">Sporcu Kayıt</button>
-        <button class="tab-btn" onclick="switchTab('antrenman')">Antrenman Çizelgesi</button>
+        <button class="tab-btn active" onclick="switchTab('bireysel')">Bireysel Kayıtlar</button>
+        <button class="tab-btn" onclick="switchTab('okul')">Futbol Okulu</button>
+        <button class="tab-btn" onclick="switchTab('antrenman')">Antrenman</button>
     </div>
 
-    <!-- Sporcu Kayıt Bölümü -->
-    <div id="kayit" class="section active card">
-        <h3>Yeni Sporcu Ekle</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px;">
-            <select id="tur"><option value="Bireysel">Bireysel</option><option value="Futbol Okulu">Futbol Okulu</option></select>
-            <input type="text" id="ad" placeholder="Ad Soyad" style="width: 200px;">
-            <input type="number" id="yas" placeholder="Yaş" style="width: 60px;">
-            <input type="tel" id="telefon" placeholder="İletişim Numarası" style="width: 150px;">
-            <button onclick="kaydet()">Sporcuyu Kaydet</button>
-        </div>
-        
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Tür</th>
-                    <th>Ad Soyad</th>
-                    <th>Yaş</th>
-                    <th>İletişim</th>
-                    <th>İşlem</th>
-                </tr>
-            </thead>
-            <tbody id="liste"></tbody>
-        </table>
+    <!-- Bireysel Kayıt -->
+    <div id="bireysel" class="section active card">
+        <h3>Bireysel Antrenman Kayıtları</h3>
+        <input type="text" id="ad_b" placeholder="Ad Soyad">
+        <input type="number" id="yas_b" placeholder="Yaş">
+        <input type="tel" id="tel_b" placeholder="Telefon">
+        <button onclick="kaydet('Bireysel', 'ad_b', 'yas_b', 'tel_b')">Ekle</button>
+        <table><thead><tr><th>Ad</th><th>Yaş</th><th>Telefon</th><th>İşlem</th></tr></thead><tbody id="liste_b"></tbody></table>
     </div>
 
-    <!-- Antrenman Çizelgesi Bölümü -->
+    <!-- Futbol Okulu Kayıt -->
+    <div id="okul" class="section card">
+        <h3>Futbol Okulu Kayıtları</h3>
+        <input type="text" id="ad_o" placeholder="Ad Soyad">
+        <input type="number" id="yas_o" placeholder="Yaş">
+        <input type="tel" id="tel_o" placeholder="Telefon">
+        <button onclick="kaydet('Futbol Okulu', 'ad_o', 'yas_o', 'tel_o')">Ekle</button>
+        <table><thead><tr><th>Ad</th><th>Yaş</th><th>Telefon</th><th>İşlem</th></tr></thead><tbody id="liste_o"></tbody></table>
+    </div>
+
+    <!-- Antrenman Çizelgesi -->
     <div id="antrenman" class="section card">
         <h3>Antrenman Çizelgesi</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px;">
-            <input type="date" id="tarih">
-            <input type="text" id="antNot" placeholder="Antrenman Notu" style="flex: 1; min-width: 200px;">
-            <button onclick="antEkle()">Antrenman Ekle</button>
-        </div>
-        <ul id="antListe" style="list-style-type: none; padding: 0;"></ul>
+        <input type="date" id="tarih">
+        <input type="text" id="antNot" placeholder="Not...">
+        <button onclick="antEkle()">Ekle</button>
+        <ul id="antListe"></ul>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-    const firebaseConfig = {
+    const db = getFirestore(initializeApp({
         apiKey: "AIzaSyBnwQM8iQO9cn34npzJS56xMvpRl2Ni0eU",
         authDomain: "futboltakip-158af.firebaseapp.com",
         projectId: "futboltakip-158af",
         storageBucket: "futboltakip-158af.firebasestorage.app",
         messagingSenderId: "725460393559",
         appId: "1:725460393559:web:70389b09cd9cb95f0a4d12"
-    };
-
-    const db = getFirestore(initializeApp(firebaseConfig));
+    }));
 
     window.switchTab = (id) => {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -93,33 +84,28 @@
         event.target.classList.add('active');
     };
 
-    // Sporcu Verileri
-    onSnapshot(collection(db, "sporcular"), (s) => {
-        let h = "";
-        s.forEach(d => {
-            let v = d.data();
-            h += `<tr><td>${v.tur||''}</td><td>${v.ad||''}</td><td>${v.yas||''}</td><td>${v.telefon||''}</td><td><button class="btn-delete" onclick="sil('${d.id}', 'sporcular')">Sil</button></td></tr>`;
+    // Listeleme
+    const listele = (tur, listeId) => {
+        onSnapshot(query(collection(db, "sporcular"), where("tur", "==", tur)), (s) => {
+            let h = "";
+            s.forEach(d => {
+                let v = d.data();
+                h += `<tr><td>${v.ad}</td><td>${v.yas}</td><td>${v.telefon}</td><td><button class="btn-delete" onclick="sil('${d.id}')">Sil</button></td></tr>`;
+            });
+            document.getElementById(listeId).innerHTML = h;
         });
-        document.getElementById("liste").innerHTML = h;
-    });
+    };
+    listele("Bireysel", "liste_b");
+    listele("Futbol Okulu", "liste_o");
 
-    window.kaydet = async () => {
-        await addDoc(collection(db, "sporcular"), { 
-            tur: document.getElementById("tur").value, 
-            ad: document.getElementById("ad").value, 
-            yas: document.getElementById("yas").value, 
-            telefon: document.getElementById("telefon").value 
-        });
+    window.kaydet = async (tur, ad, yas, tel) => {
+        await addDoc(collection(db, "sporcular"), { tur, ad: document.getElementById(ad).value, yas: document.getElementById(yas).value, telefon: document.getElementById(tel).value });
         alert("Kayıt Başarılı!");
     };
 
-    // Antrenman
     onSnapshot(collection(db, "antrenman"), (s) => {
         let h = "";
-        s.forEach(d => {
-            let v = d.data();
-            h += `<li style="padding:10px; border-bottom:1px solid #eee;">📅 ${v.tarih} - ${v.not} <button class="btn-delete" onclick="sil('${d.id}', 'antrenman')">Sil</button></li>`;
-        });
+        s.forEach(d => h += `<li>${d.data().tarih} - ${d.data().not} <button class="btn-delete" onclick="sil('${d.id}', 'antrenman')">Sil</button></li>`);
         document.getElementById("antListe").innerHTML = h;
     });
 
@@ -127,7 +113,7 @@
         await addDoc(collection(db, "antrenman"), { tarih: document.getElementById("tarih").value, not: document.getElementById("antNot").value });
     };
 
-    window.sil = async (id, col) => { if(confirm("Emin misiniz?")) await deleteDoc(doc(db, col, id)); };
+    window.sil = async (id, col = "sporcular") => { await deleteDoc(doc(db, col, id)); };
 </script>
 </body>
 </html>
