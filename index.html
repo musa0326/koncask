@@ -2,430 +2,67 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Futbol Akademi & Antrenman Takip Sistemi</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
+    <title>Futbol Takip Sistemi</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-    <!-- GİRİŞ EKRANI (Şifreli) -->
-    <div id="authScreen" class="fixed inset-0 bg-slate-950 z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700 p-8 rounded-2xl shadow-2xl max-w-md w-full space-y-6">
-            <div class="text-center space-y-2">
-                <div class="bg-emerald-600 text-white w-14 h-14 mx-auto flex items-center justify-center rounded-2xl shadow-lg">
-                    <i class="fa-solid fa-lock text-2xl"></i>
-                </div>
-                <h2 class="text-xl font-bold">Antrenör Giriş Paneli</h2>
-                <p class="text-xs text-slate-400">Devam etmek için lütfen antrenör şifrenizi girin.</p>
-            </div>
-            <form onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Erişim Şifresi</label>
-                    <input type="password" id="loginPassword" required placeholder="Şifreniz (Varsayılan: 1234)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500">
-                </div>
-                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-xl transition shadow-lg shadow-emerald-900/20">
-                    Sisteme Giriş Yap
-                </button>
-            </form>
-            <p class="text-[10px] text-center text-slate-500">İlk kurulum şifresi: <span class="text-slate-300 font-mono">1234</span> (İstediğiniz zaman değiştirebilirsiniz)</p>
-        </div>
-    </div>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnwQM8iQO9cn34npzJS56xMvpRl2Ni0eU",
+            authDomain: "futboltakip-158af.firebaseapp.com",
+            projectId: "futboltakip-158af",
+            storageBucket: "futboltakip-158af.firebasestorage.app",
+            messagingSenderId: "725460393559",
+            appId: "1:725460393559:web:70389b09cd9cb95f0a4d12"
+        };
 
-    <!-- ANA UYGULAMA (Giriş Sonrası Görünür) -->
-    <div id="appContainer" class="hidden min-h-screen flex flex-col">
-        <!-- Üst Menü -->
-        <header class="bg-slate-800 border-b border-slate-700 shadow-md">
-            <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-emerald-600 text-white p-3 rounded-xl shadow-lg">
-                        <i class="fa-solid fa-futbol text-2xl animate-pulse"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold tracking-wide">Futbol Akademi & Antrenman Takip</h1>
-                        <p class="text-xs text-slate-400">Ortak Antrenör Yönetim Paneli</p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <nav class="flex space-x-2 bg-slate-900 p-1.5 rounded-xl border border-slate-700">
-                        <button onclick="switchTab('players')" id="nav-players" class="px-4 py-2 rounded-lg font-medium text-sm transition-all bg-emerald-600 text-white shadow">
-                            <i class="fa-solid fa-users mr-2"></i> Sporcular
-                        </button>
-                        <button onclick="switchTab('schedule')" id="nav-schedule" class="px-4 py-2 rounded-lg font-medium text-sm transition-all text-slate-400 hover:text-white">
-                            <i class="fa-solid fa-calendar-days mr-2"></i> Çizelge
-                        </button>
-                    </nav>
-                    <button onclick="logout()" title="Çıkış Yap" class="bg-slate-900 border border-slate-700 text-slate-400 hover:text-rose-400 p-2.5 rounded-xl transition">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
-                </div>
-            </div>
-        </header>
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        <!-- Ana İçerik -->
-        <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-6">
-
-            <!-- Veri Yedekleme Araç Çubuğu -->
-            <div class="bg-slate-800 border border-slate-700 p-4 rounded-2xl flex flex-wrap justify-between items-center gap-4 shadow-lg">
-                <div class="flex items-center space-x-2 text-xs text-slate-300">
-                    <i class="fa-solid fa-database text-emerald-400"></i>
-                    <span>Arkadaşlarınla veri paylaşmak için yedek alabilir veya dışarıdan dosya yükleyebilirsin.</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button onclick="exportData()" class="bg-slate-700 hover:bg-slate-600 text-xs text-white px-3 py-2 rounded-xl transition flex items-center">
-                        <i class="fa-solid fa-download mr-1.5 text-emerald-400"></i> Yedeği İndir
-                    </button>
-                    <label class="bg-slate-700 hover:bg-slate-600 text-xs text-white px-3 py-2 rounded-xl transition flex items-center cursor-pointer">
-                        <i class="fa-solid fa-upload mr-1.5 text-blue-400"></i> Yedek Yükle
-                        <input type="file" id="importFile" accept=".json" onchange="importData(event)" class="hidden">
-                    </label>
-                </div>
-            </div>
-
-            <!-- SEKME 1: SPORCU KAYITLARI -->
-            <section id="tab-players" class="space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Kayıt Formu -->
-                    <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl shadow-xl h-fit">
-                        <h2 class="text-lg font-semibold mb-4 flex items-center text-emerald-400">
-                            <i class="fa-solid fa-user-plus mr-2"></i> Yeni Sporcu Kaydı
-                        </h2>
-                        <form id="playerForm" onsubmit="addPlayer(event)" class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Sporcu Adı Soyadı</label>
-                                <input type="text" id="pName" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Yaş / Doğum Yılı</label>
-                                <input type="text" id="pAge" required placeholder="Örn: 2012" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Mevki</label>
-                                <select id="pPosition" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                                    <option value="Kaleci">Kaleci</option>
-                                    <option value="Defans">Defans</option>
-                                    <option value="Orta Saha">Orta Saha</option>
-                                    <option value="Forvet">Forvet</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Veli İletişim (Telefon)</label>
-                                <input type="text" id="pPhone" required placeholder="05XX XXX XX XX" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Eğitim Türü</label>
-                                <select id="pType" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                                    <option value="Futbol Okulu (Grup)">Futbol Okulu (Grup)</option>
-                                    <option value="Bireysel Antrenman">Bireysel Antrenman</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-xl transition shadow-lg shadow-emerald-900/20">
-                                Sporcuyu Kaydet
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Sporcu Listesi -->
-                    <div class="lg:col-span-2 bg-slate-800 border border-slate-700 p-6 rounded-2xl shadow-xl">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-                            <h2 class="text-lg font-semibold flex items-center text-emerald-400">
-                                <i class="fa-solid fa-users-rectangle mr-2"></i> Kayıtlı Sporcular (<span id="playerCount">0</span>)
-                            </h2>
-                            <div class="flex items-center gap-2 w-full md:w-auto">
-                                <select id="filterType" onchange="renderPlayers()" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-emerald-500 text-slate-300">
-                                    <option value="all">Tüm Eğitimler</option>
-                                    <option value="Futbol Okulu (Grup)">Futbol Okulu (Grup)</option>
-                                    <option value="Bireysel Antrenman">Bireysel Antrenman</option>
-                                </select>
-                                <input type="text" id="searchPlayer" onkeyup="renderPlayers()" placeholder="Sporcu ara..." class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-emerald-500 w-full md:w-48">
-                            </div>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="border-b border-slate-700 text-xs text-slate-400 uppercase">
-                                        <th class="py-3 px-4">İsim</th>
-                                        <th class="py-3 px-4">Yaş</th>
-                                        <th class="py-3 px-4">Mevki</th>
-                                        <th class="py-3 px-4">İletişim</th>
-                                        <th class="py-3 px-4">Tür</th>
-                                        <th class="py-3 px-4 text-center">İşlem</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="playerTableBody" class="divide-y divide-slate-700/50 text-sm">
-                                    <!-- Dinamik Dolacak -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SEKME 2: ANTRENMAN ÇİZELGESİ -->
-            <section id="tab-schedule" class="hidden space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Seans Ekleme Formu -->
-                    <div class="bg-slate-800 border border-slate-700 p-6 rounded-2xl shadow-xl h-fit">
-                        <h2 class="text-lg font-semibold mb-4 flex items-center text-emerald-400">
-                            <i class="fa-solid fa-calendar-plus mr-2"></i> Antrenman / Seans Planla
-                        </h2>
-                        <form id="scheduleForm" onsubmit="addSchedule(event)" class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Antrenman Başlığı</label>
-                                <input type="text" id="sTitle" required placeholder="Örn: U12 Teknik & Pas Çalışması" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Tarih & Saat</label>
-                                <input type="datetime-local" id="sDatetime" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Yer / Saha</label>
-                                <input type="text" id="sLocation" required placeholder="Örn: 3 Nolu Sentetik Saha" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1">Çalışma Odak / İçerik</label>
-                                <textarea id="sNotes" rows="3" placeholder="Örn: Çabukluk, şut teknikleri..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500"></textarea>
-                            </div>
-                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-xl transition shadow-lg shadow-emerald-900/20">
-                                Takvime Ekle
-                            </button>
-                        </form>
-                    </div>
-
-                    <!-- Çizelge Listesi -->
-                    <div class="lg:col-span-2 bg-slate-800 border border-slate-700 p-6 rounded-2xl shadow-xl">
-                        <h2 class="text-lg font-semibold mb-4 flex items-center text-emerald-400">
-                            <i class="fa-solid fa-list-check mr-2"></i> Planlanan Antrenman Çizelgesi
-                        </h2>
-                        <div id="scheduleList" class="space-y-4">
-                            <!-- Dinamik Dolacak -->
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
-    </div>
-
-    <!-- JavaScript Mantığı -->
-    <script>
-        // Şifre Kontrolü
-        const APP_PASSWORD = "1234"; // Dilerseniz buradaki şifreyi değiştirebilirsiniz
-
-        function checkAuth() {
-            if (sessionStorage.getItem('fa_logged_in') === 'true') {
-                document.getElementById('authScreen').classList.add('hidden');
-                document.getElementById('appContainer').classList.remove('hidden');
-                renderPlayers();
-            }
-        }
-
-        function handleLogin(e) {
-            e.preventDefault();
-            const pass = document.getElementById('loginPassword').value;
-            if (pass === APP_PASSWORD) {
-                sessionStorage.setItem('fa_logged_in', 'true');
-                document.getElementById('authScreen').classList.add('hidden');
-                document.getElementById('appContainer').classList.remove('hidden');
-                renderPlayers();
+        // Şifre kontrolü
+        const APP_PASSWORD = "1234";
+        
+        function checkPassword() {
+            let pass = prompt("Lütfen şifreyi girin:");
+            if (pass !== APP_PASSWORD) {
+                alert("Hatalı şifre!");
+                location.reload();
             } else {
-                alert("Hatalı şifre! Lütfen tekrar deneyin.");
+                renderUI();
             }
         }
 
-        function logout() {
-            sessionStorage.removeItem('fa_logged_in');
-            location.reload();
-        }
-
-        // Veri Yapısı
-        let players = JSON.parse(localStorage.getItem('fa_players')) || [];
-        let schedules = JSON.parse(localStorage.getItem('fa_schedules')) || [];
-
-        // Sekme Değiştirme
-        function switchTab(tabId) {
-            const playersTab = document.getElementById('tab-players');
-            const scheduleTab = document.getElementById('tab-schedule');
-            const navPlayers = document.getElementById('nav-players');
-            const navSchedule = document.getElementById('nav-schedule');
-
-            if (tabId === 'players') {
-                playersTab.classList.remove('hidden');
-                scheduleTab.classList.add('hidden');
-                navPlayers.className = "px-4 py-2 rounded-lg font-medium text-sm transition-all bg-emerald-600 text-white shadow";
-                navSchedule.className = "px-4 py-2 rounded-lg font-medium text-sm transition-all text-slate-400 hover:text-white";
-            } else {
-                playersTab.classList.add('hidden');
-                scheduleTab.classList.remove('hidden');
-                navSchedule.className = "px-4 py-2 rounded-lg font-medium text-sm transition-all bg-emerald-600 text-white shadow";
-                navPlayers.className = "px-4 py-2 rounded-lg font-medium text-sm transition-all text-slate-400 hover:text-white";
-                renderSchedules();
-            }
-        }
-
-        // Sporcu Ekle
-        function addPlayer(e) {
-            e.preventDefault();
-            const newPlayer = {
-                id: Date.now(),
-                name: document.getElementById('pName').value,
-                age: document.getElementById('pAge').value,
-                position: document.getElementById('pPosition').value,
-                phone: document.getElementById('pPhone').value,
-                type: document.getElementById('pType').value
-            };
-            players.push(newPlayer);
-            localStorage.setItem('fa_players', JSON.stringify(players));
-            document.getElementById('playerForm').reset();
-            renderPlayers();
-        }
-
-        // Sporcu Sil
-        function deletePlayer(id) {
-            if(confirm("Bu sporcu kaydını silmek istediğinize emin misiniz?")) {
-                players = players.filter(p => p.id !== id);
-                localStorage.setItem('fa_players', JSON.stringify(players));
-                renderPlayers();
-            }
-        }
-
-        // Sporcuları Listele & Filtrele
-        function renderPlayers() {
-            const searchVal = document.getElementById('searchPlayer').value.toLowerCase();
-            const filterVal = document.getElementById('filterType').value;
-            const tbody = document.getElementById('playerTableBody');
-            tbody.innerHTML = '';
-
-            let filtered = players.filter(p => p.name.toLowerCase().includes(searchVal));
-            if (filterVal !== 'all') {
-                filtered = filtered.filter(p => p.type === filterVal);
-            }
-
-            document.getElementById('playerCount').innerText = filtered.length;
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">Kayıtlı sporcu bulunamadı.</td></tr>`;
-                return;
-            }
-
-            filtered.forEach(p => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-700/30 transition">
-                        <td class="py-3 px-4 font-medium text-white">${p.name}</td>
-                        <td class="py-3 px-4 text-slate-300">${p.age}</td>
-                        <td class="py-3 px-4"><span class="bg-slate-700 text-emerald-400 text-xs px-2.5 py-1 rounded-full">${p.position}</span></td>
-                        <td class="py-3 px-4 text-slate-300">${p.phone}</td>
-                        <td class="py-3 px-4"><span class="text-xs ${p.type.includes('Bireysel') ? 'text-amber-400' : 'text-blue-400'}">${p.type}</span></td>
-                        <td class="py-3 px-4 text-center">
-                            <button onclick="deletePlayer(${p.id})" class="text-rose-400 hover:text-rose-300 transition p-1"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
+        // Verileri ekrana basma
+        function renderUI() {
+            document.body.innerHTML = `
+                <h1>Futbolcu Takip Paneli</h1>
+                <input id="ad" placeholder="Ad Soyad">
+                <button onclick="ekle()">Ekle</button>
+                <ul id="liste"></ul>
+            `;
+            
+            onSnapshot(collection(db, "sporcular"), (snapshot) => {
+                const liste = document.getElementById("liste");
+                liste.innerHTML = "";
+                snapshot.forEach((doc) => {
+                    liste.innerHTML += `<li>${doc.data().ad} <button onclick="sil('${doc.id}')">Sil</button></li>`;
+                });
             });
         }
 
-        // Antrenman Ekle
-        function addSchedule(e) {
-            e.preventDefault();
-            const newSchedule = {
-                id: Date.now(),
-                title: document.getElementById('sTitle').value,
-                datetime: document.getElementById('sDatetime').value,
-                location: document.getElementById('sLocation').value,
-                notes: document.getElementById('sNotes').value
-            };
-            schedules.push(newSchedule);
-            localStorage.setItem('fa_schedules', JSON.stringify(schedules));
-            document.getElementById('scheduleForm').reset();
-            renderSchedules();
-        }
+        window.ekle = async () => {
+            const ad = document.getElementById("ad").value;
+            if(ad) await addDoc(collection(db, "sporcular"), { ad: ad });
+        };
 
-        // Antrenman Sil
-        function deleteSchedule(id) {
-            if(confirm("Bu antrenman seansını takvimden kaldırmak istediğinize emin misiniz?")) {
-                schedules = schedules.filter(s => s.id !== id);
-                localStorage.setItem('fa_schedules', JSON.stringify(schedules));
-                renderSchedules();
-            }
-        }
+        window.sil = async (id) => {
+            await deleteDoc(doc(db, "sporcular", id));
+        };
 
-        // Antrenmanları Listele
-        function renderSchedules() {
-            const container = document.getElementById('scheduleList');
-            container.innerHTML = '';
-
-            if (schedules.length === 0) {
-                container.innerHTML = `<div class="text-center py-8 text-slate-500 bg-slate-900/50 rounded-xl border border-slate-700/50">Planlanmış aktif bir antrenman seansı bulunmuyor.</div>`;
-                return;
-            }
-
-            schedules.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
-
-            schedules.forEach(s => {
-                const dateFormatted = new Date(s.datetime).toLocaleString('tr-TR', { dateStyle: 'full', timeStyle: 'short' });
-                container.innerHTML += `
-                    <div class="bg-slate-900 border border-slate-700/70 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div class="space-y-1">
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs px-2.5 py-0.5 rounded-md"><i class="fa-regular fa-clock mr-1"></i> ${dateFormatted}</span>
-                                <span class="text-xs text-slate-400"><i class="fa-solid fa-location-dot mr-1"></i> ${s.location}</span>
-                            </div>
-                            <h3 class="font-bold text-base text-white pt-1">${s.title}</h3>
-                            <p class="text-xs text-slate-400">${s.notes || 'Özel not girilmemiş.'}</p>
-                        </div>
-                        <button onclick="deleteSchedule(${s.id})" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 px-3 py-1.5 rounded-lg text-xs transition flex items-center self-end md:self-center">
-                            <i class="fa-solid fa-trash mr-1.5"></i> Kaldır
-                        </button>
-                    </div>
-                `;
-            });
-        }
-
-        // Veri Dışa Aktarma (Yedek Al)
-        function exportData() {
-            const data = {
-                players: players,
-                schedules: schedules,
-                date: new Date().toISOString()
-            };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `futbol-akademi-yedek-${new Date().toISOString().slice(0,10)}.json`;
-            a.click();
-        }
-
-        // Veri İçe Aktarma (Yedek Yükle)
-        function importData(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                try {
-                    const parsed = JSON.parse(event.target.result);
-                    if (parsed.players && parsed.schedules) {
-                        if(confirm("Yüklenen yedek dosyasındaki veriler mevcut verilerinizle birleştirilsin mi?")) {
-                            players = parsed.players;
-                            schedules = parsed.schedules;
-                            localStorage.setItem('fa_players', JSON.stringify(players));
-                            localStorage.setItem('fa_schedules', JSON.stringify(schedules));
-                            renderPlayers();
-                            alert("Yedek başarıyla yüklendi!");
-                        }
-                    } else {
-                        alert("Geçersiz yedek dosyası formatı!");
-                    }
-                } catch (err) {
-                    alert("Dosya okunurken bir hata oluştu.");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // İlk Çalıştırma Kontrolü
-        checkAuth();
+        checkPassword();
     </script>
+</head>
+<body>
+    <p>Yükleniyor...</p>
 </body>
 </html>
