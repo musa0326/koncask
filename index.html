@@ -30,39 +30,62 @@
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('kayit')">Sporcu Kayıt</button>
+        <button class="tab-btn active" onclick="switchTab('kayitlar')">Sporcu Kayıtları</button>
         <button class="tab-btn" onclick="switchTab('antrenman')">Antrenman Çizelgesi</button>
     </div>
 
-    <!-- Sporcu Kayıt Bölümü -->
-    <div id="kayit" class="section active card">
-        <h3>Yeni Sporcu Ekle</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px;">
-            <select id="tur">
-                <option value="Bireysel">Bireysel</option>
-                <option value="Futbol Okulu">Futbol Okulu</option>
-            </select>
-            <input type="text" id="ad" placeholder="Ad Soyad" style="width: 180px;">
-            <input type="number" id="yas" placeholder="Yaş" style="width: 60px;">
-            <input type="tel" id="telefon" placeholder="İletişim Numarası" style="width: 140px;">
-            <button onclick="kaydet()">Sporcuyu Kaydet</button>
+    <!-- Sporcu Kayıtları Bölümü (Ayrı Tablolar) -->
+    <div id="kayitlar" class="section active">
+        <!-- Yeni Ekleme Kartı -->
+        <div class="card">
+            <h3>Yeni Sporcu Ekle</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                <select id="tur">
+                    <option value="Futbol Okulu">Futbol Okulu</option>
+                    <option value="Bireysel">Bireysel</option>
+                </select>
+                <input type="text" id="ad" placeholder="Ad Soyad" style="width: 180px;">
+                <input type="number" id="yas" placeholder="Yaş" style="width: 60px;">
+                <input type="tel" id="telefon" placeholder="İletişim Numarası" style="width: 140px;">
+                <button onclick="kaydet()">Sporcuyu Kaydet</button>
+            </div>
         </div>
-        
-        <h3>Kayıtlı Sporcular</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Kayıt Türü</th>
-                    <th>Ad Soyad</th>
-                    <th>Yaş</th>
-                    <th>İletişim</th>
-                    <th>İşlem</th>
-                </tr>
-            </thead>
-            <tbody id="liste">
-                <tr><td colspan="5" style="text-align: center;">Yükleniyor...</td></tr>
-            </tbody>
-        </table>
+
+        <!-- Futbol Okulu Tablosu -->
+        <div class="card">
+            <h3 style="color: #1e293b;">🏫 Futbol Okulu Listesi</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ad Soyad</th>
+                        <th>Yaş</th>
+                        <th>İletişim</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody id="listeFutbolOkulu">
+                    <tr><td colspan="4" style="text-align: center;">Yükleniyor...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Bireysel Kayıtlar Tablosu -->
+        <div class="card">
+            <h3 style="color: #1e293b;">👤 Bireysel Kayıt Listesi</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ad Soyad</th>
+                        <th>Yaş</th>
+                        <th>İletişim</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody id="listeBireysel">
+                    <tr><td colspan="4" style="text-align: center;">Yükleniyor...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Antrenman Çizelgesi Bölümü -->
@@ -73,7 +96,6 @@
             <input type="text" id="antNot" placeholder="Antrenman Notu" style="flex: 1; min-width: 200px;">
             <button onclick="antEkle()">Antrenman Ekle</button>
         </div>
-        <h3>Planlanan Antrenmanlar</h3>
         <ul id="antListe" style="list-style-type: none; padding: 0;">
             <li style="padding: 8px; color: #666;">Yükleniyor...</li>
         </ul>
@@ -102,24 +124,37 @@
         event.target.classList.add('active');
     };
 
-    // Sporcu Verilerini Çek ve Listele
+    // Verileri Çek ve Türlerine Göre Ayrı Tablolara Ayır
     onSnapshot(collection(db, "sporcular"), (s) => {
-        let h = "";
-        if (s.empty) {
-            h = `<tr><td colspan="5" style="text-align: center;">Henüz kayıtlı sporcu yok.</td></tr>`;
-        } else {
-            s.forEach(d => {
-                let v = d.data();
-                h += `<tr>
-                    <td><b>${v.tur || '-'}</b></td>
-                    <td>${v.ad || '-'}</td>
-                    <td>${v.yas || '-'}</td>
-                    <td>${v.telefon || '-'}</td>
-                    <td><button class="btn-delete" onclick="sil('${d.id}', 'sporcular')">Sil</button></td>
-                </tr>`;
-            });
-        }
-        document.getElementById("liste").innerHTML = h;
+        let futbolHtml = "";
+        let bireyselHtml = "";
+        
+        let futbolSayisi = 0;
+        let bireyselSayisi = 0;
+
+        s.forEach(d => {
+            let v = d.data();
+            let satir = `<tr>
+                <td>${v.ad || '-'}</td>
+                <td>${v.yas || '-'}</td>
+                <td>${v.telefon || '-'}</td>
+                <td><button class="btn-delete" onclick="sil('${d.id}', 'sporcular')">Sil</button></td>
+            </tr>`;
+
+            if (v.tur === "Futbol Okulu") {
+                futbolHtml += satir;
+                futbolSayisi++;
+            } else if (v.tur === "Bireysel") {
+                bireyselHtml += satir;
+                bireyselSayisi++;
+            }
+        });
+
+        if (futbolSayisi === 0) futbolHtml = `<tr><td colspan="4" style="text-align: center; color: #666;">Futbol okulu kaydı bulunmuyor.</td></tr>`;
+        if (bireyselSayisi === 0) bireyselHtml = `<tr><td colspan="4" style="text-align: center; color: #666;">Bireysel kayıt bulunmuyor.</td></tr>`;
+
+        document.getElementById("listeFutbolOkulu").innerHTML = futbolHtml;
+        document.getElementById("listeBireysel").innerHTML = bireyselHtml;
     });
 
     window.kaydet = async () => {
