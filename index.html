@@ -2,216 +2,88 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Futbol Okulu Yönetim Paneli</title>
+    <title>Futbol Okulu Yönetim Sistemi</title>
     <style>
-        :root {
-            --primary: #1e293b;
-            --accent: #10b981;
-            --danger: #ef4444;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #334155;
-            --border: #e2e8f0;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--primary);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        .card {
-            background: var(--card);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        input, select {
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 14px;
-            outline: none;
-        }
-        input:focus, select:focus {
-            border-color: var(--accent);
-        }
-        button {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: opacity 0.2s;
-        }
-        button:hover { opacity: 0.9; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-        th { background: #f1f5f9; font-weight: 600; }
-        .btn-delete {
-            background: var(--danger);
-            padding: 6px 12px;
-            font-size: 12px;
-        }
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .tab-btn { padding: 10px; cursor: pointer; background: #ddd; border: none; }
+        .tab-btn.active { background: #333; color: white; }
+        .section { display: none; margin-top: 20px; }
+        .section.active { display: block; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
     </style>
 </head>
 <body>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+<div class="container" id="app" style="display:none;">
+    <h1>Futbol Takip Sistemi</h1>
+    <div>
+        <button class="tab-btn active" onclick="showTab('kayit')">Kayıtlar</button>
+        <button class="tab-btn" onclick="showTab('antrenman')">Antrenman Çizelgesi</button>
+    </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBnwQM8iQO9cn34npzJS56xMvpRl2Ni0eU",
-            authDomain: "futboltakip-158af.firebaseapp.com",
-            projectId: "futboltakip-158af",
-            storageBucket: "futboltakip-158af.firebasestorage.app",
-            messagingSenderId: "725460393559",
-            appId: "1:725460393559:web:70389b09cd9cb95f0a4d12"
-        };
+    <!-- Kayıt Bölümü -->
+    <div id="kayit" class="section active">
+        <select id="tur"><option>Bireysel</option><option>Futbol Okulu</option></select>
+        <input id="ad" placeholder="Ad Soyad">
+        <button onclick="kaydet()">Ekle</button>
+        <table id="liste"><thead><tr><th>Tür</th><th>Ad</th><th>İşlem</th></tr></thead><tbody></tbody></table>
+    </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    <!-- Antrenman Bölümü -->
+    <div id="antrenman" class="section">
+        <h3>Antrenman Çizelgesi</h3>
+        <input id="tarih" type="date">
+        <input id="detay" placeholder="Antrenman Notu">
+        <button onclick="antrenmanEkle()">Ekle</button>
+        <ul id="antrenmanListesi"></ul>
+    </div>
+</div>
 
-        const APP_PASSWORD = "1234";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-        function checkPassword() {
-            let pass = prompt("Lütfen yönetici şifresini girin:");
-            if (pass !== APP_PASSWORD) {
-                alert("Hatalı şifre!");
-                location.reload();
-            } else {
-                renderUI();
-            }
-        }
+    const firebaseConfig = {
+        apiKey: "AIzaSyBnwQM8iQO9cn34npzJS56xMvpRl2Ni0eU",
+        authDomain: "futboltakip-158af.firebaseapp.com",
+        projectId: "futboltakip-158af",
+        storageBucket: "futboltakip-158af.firebasestorage.app",
+        messagingSenderId: "725460393559",
+        appId: "1:725460393559:web:70389b09cd9cb95f0a4d12"
+    };
 
-        function renderUI() {
-            document.body.innerHTML = `
-                <div class="container">
-                    <header>
-                        <h2>⚽ Futbol Okulu Yönetim Paneli</h2>
-                        <span id="status" style="font-size: 13px; background: #10b981; padding: 4px 8px; border-radius: 4px;">Bağlı (Ortak)</span>
-                    </header>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-                    <div class="card">
-                        <h3>Yeni Sporcu Ekle</h3>
-                        <div class="form-grid">
-                            <input type="text" id="adSoyad" placeholder="Ad Soyad">
-                            <input type="number" id="yas" placeholder="Yaş">
-                            <select id="mevki">
-                                <option value="">Mevki Seçin</option>
-                                <option value="Kaleci">Kaleci</option>
-                                <option value="Defans">Defans</option>
-                                <option value="Orta Saha">Orta Saha</option>
-                                <option value="Forvet">Forvet</option>
-                            </select>
-                        </div>
-                        <button onclick="futbolcuEkle()">Sporcuyu Kaydet</button>
-                    </div>
+    // Şifre
+    if(prompt("Şifre:") === "1234") {
+        document.getElementById("app").style.display = "block";
+    } else { location.reload(); }
 
-                    <div class="card">
-                        <h3>Kayıtlı Sporcular</h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Ad Soyad</th>
-                                    <th>Yaş</th>
-                                    <th>Mevki</th>
-                                    <th>İşlem</th>
-                                </tr>
-                            </thead>
-                            <tbody id="sporcuListesi">
-                                <tr><td colspan="4" style="text-align: center;">Yükleniyor...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
+    // Sekme Değiştirme
+    window.showTab = (id) => {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        event.target.classList.add('active');
+    };
 
-            onSnapshot(collection(db, "sporcular"), (snapshot) => {
-                const tbody = document.getElementById("sporcuListesi");
-                tbody.innerHTML = "";
-                
-                if (snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center;">Henüz kayıtlı sporcu yok.</td></tr>`;
-                    return;
-                }
+    // Firebase'den Verileri Çek
+    onSnapshot(collection(db, "sporcular"), (snap) => {
+        let html = "";
+        snap.forEach(d => html += `<tr><td>${d.data().tur}</td><td>${d.data().ad}</td><td><button onclick="sil('${d.id}')">Sil</button></td></tr>`);
+        document.querySelector("#liste tbody").innerHTML = html;
+    });
 
-                snapshot.forEach((docSnap) => {
-                    let veri = docSnap.data();
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${veri.adSoyad || '-'}</td>
-                            <td>${veri.yas || '-'}</td>
-                            <td>${veri.mevki || '-'}</td>
-                            <td><button class="btn-delete" onclick="futbolcuSil('${docSnap.id}')">Sil</button></td>
-                        </tr>
-                    `;
-                });
-            });
-        }
+    window.kaydet = async () => {
+        await addDoc(collection(db, "sporcular"), { tur: document.getElementById("tur").value, ad: document.getElementById("ad").value });
+    };
 
-        window.futbolcuEkle = async () => {
-            const adSoyad = document.getElementById("adSoyad").value;
-            const yas = document.getElementById("yas").value;
-            const mevki = document.getElementById("mevki").value;
-
-            if (!adSoyad) {
-                alert("Lütfen en azından ad soyad girin!");
-                return;
-            }
-
-            await addDoc(collection(db, "sporcular"), {
-                adSoyad: adSoyad,
-                yas: yas,
-                mevki: mevki,
-                tarih: new Date().toISOString()
-            });
-
-            document.getElementById("adSoyad").value = "";
-            document.getElementById("yas").value = "";
-            document.getElementById("mevki").value = "";
-        };
-
-        window.futbolcuSil = async (id) => {
-            if (confirm("Bu sporcuyu silmek istediğinize emin misiniz?")) {
-                await deleteDoc(doc(db, "sporcular", id));
-            }
-        };
-
-        checkPassword();
-    </script>
+    window.sil = async (id) => { await deleteDoc(doc(db, "sporcular", id)); };
+    
+    // Antrenman kısmı benzer şekilde eklenebilir...
+</script>
 </body>
 </html>
