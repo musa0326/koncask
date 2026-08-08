@@ -2,42 +2,50 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Futbol Okulu Yönetim Sistemi</title>
+    <title>Futbol Okulu Yönetim Paneli</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .tab-btn { padding: 10px; cursor: pointer; background: #ddd; border: none; }
-        .tab-btn.active { background: #333; color: white; }
-        .section { display: none; margin-top: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; padding: 20px; color: #334155; }
+        .container { max-width: 900px; margin: auto; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { padding: 10px 20px; cursor: pointer; border: none; border-radius: 6px; background: #e2e8f0; font-weight: bold; }
+        .tab-btn.active { background: #10b981; color: white; }
+        .section { display: none; }
         .section.active { display: block; }
+        input, select, button { padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin: 5px; }
+        button { background: #10b981; color: white; border: none; cursor: pointer; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
     </style>
 </head>
 <body>
 
-<div class="container" id="app" style="display:none;">
-    <h1>Futbol Takip Sistemi</h1>
-    <div>
-        <button class="tab-btn active" onclick="showTab('kayit')">Kayıtlar</button>
-        <button class="tab-btn" onclick="showTab('antrenman')">Antrenman Çizelgesi</button>
+<div class="container">
+    <div class="card" style="background: #1e293b; color: white; display: flex; justify-content: space-between;">
+        <h2>⚽ Futbol Okulu Yönetim Paneli</h2>
+        <span style="background: #10b981; padding: 5px 10px; border-radius: 5px;">Bağlı (Ortak)</span>
     </div>
 
-    <!-- Kayıt Bölümü -->
-    <div id="kayit" class="section active">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('kayit')">Sporcu Kayıt</button>
+        <button class="tab-btn" onclick="switchTab('antrenman')">Antrenman</button>
+    </div>
+
+    <div id="kayit" class="section active card">
+        <h3>Yeni Sporcu Ekle</h3>
         <select id="tur"><option>Bireysel</option><option>Futbol Okulu</option></select>
-        <input id="ad" placeholder="Ad Soyad">
-        <button onclick="kaydet()">Ekle</button>
-        <table id="liste"><thead><tr><th>Tür</th><th>Ad</th><th>İşlem</th></tr></thead><tbody></tbody></table>
+        <input type="text" id="ad" placeholder="Ad Soyad">
+        <input type="number" id="yas" placeholder="Yaş">
+        <button onclick="kaydet()">Kaydet</button>
+        <table><thead><tr><th>Tür</th><th>Ad Soyad</th><th>Yaş</th><th>İşlem</th></tr></thead><tbody id="liste"></tbody></table>
     </div>
 
-    <!-- Antrenman Bölümü -->
-    <div id="antrenman" class="section">
+    <div id="antrenman" class="section card">
         <h3>Antrenman Çizelgesi</h3>
-        <input id="tarih" type="date">
-        <input id="detay" placeholder="Antrenman Notu">
-        <button onclick="antrenmanEkle()">Ekle</button>
-        <ul id="antrenmanListesi"></ul>
+        <input type="date" id="tarih">
+        <input type="text" id="not" placeholder="Antrenman Detayı">
+        <button onclick="antEkle()">Ekle</button>
+        <ul id="antListe"></ul>
     </div>
 </div>
 
@@ -54,36 +62,38 @@
         appId: "1:725460393559:web:70389b09cd9cb95f0a4d12"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db = getFirestore(initializeApp(firebaseConfig));
 
-    // Şifre
-    if(prompt("Şifre:") === "1234") {
-        document.getElementById("app").style.display = "block";
-    } else { location.reload(); }
-
-    // Sekme Değiştirme
-    window.showTab = (id) => {
+    window.switchTab = (id) => {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         event.target.classList.add('active');
     };
 
-    // Firebase'den Verileri Çek
-    onSnapshot(collection(db, "sporcular"), (snap) => {
-        let html = "";
-        snap.forEach(d => html += `<tr><td>${d.data().tur}</td><td>${d.data().ad}</td><td><button onclick="sil('${d.id}')">Sil</button></td></tr>`);
-        document.querySelector("#liste tbody").innerHTML = html;
+    // Sporcu Kayıt
+    onSnapshot(collection(db, "sporcular"), (s) => {
+        let h = "";
+        s.forEach(d => h += `<tr><td>${d.data().tur}</td><td>${d.data().ad}</td><td>${d.data().yas}</td><td><button onclick="sil('${d.id}', 'sporcular')">Sil</button></td></tr>`);
+        document.getElementById("liste").innerHTML = h;
     });
 
     window.kaydet = async () => {
-        await addDoc(collection(db, "sporcular"), { tur: document.getElementById("tur").value, ad: document.getElementById("ad").value });
+        await addDoc(collection(db, "sporcular"), { tur: document.getElementById("tur").value, ad: document.getElementById("ad").value, yas: document.getElementById("yas").value });
     };
 
-    window.sil = async (id) => { await deleteDoc(doc(db, "sporcular", id)); };
-    
-    // Antrenman kısmı benzer şekilde eklenebilir...
+    // Antrenman
+    onSnapshot(collection(db, "antrenman"), (s) => {
+        let h = "";
+        s.forEach(d => h += `<li>${d.data().tarih} - ${d.data().not} <button onclick="sil('${d.id}', 'antrenman')">Sil</button></li>`);
+        document.getElementById("antListe").innerHTML = h;
+    });
+
+    window.antEkle = async () => {
+        await addDoc(collection(db, "antrenman"), { tarih: document.getElementById("tarih").value, not: document.getElementById("not").value });
+    };
+
+    window.sil = async (id, col) => { await deleteDoc(doc(db, col, id)); };
 </script>
 </body>
 </html>
