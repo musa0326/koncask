@@ -45,10 +45,10 @@
     </div>
   </div>
 
-  <!-- 2. ANA PANEL (SADECE GÖRSELDEN BİREBİR KOPYALANAN TASARIM) -->
+  <!-- 2. ANA PANEL -->
   <div id="mainContent" class="hidden max-w-6xl mx-auto space-y-4">
 
-    <!-- HEADER BAR (KOYU LACİVERT) -->
+    <!-- HEADER BAR -->
     <header class="bg-[#1e293b] text-white rounded-xl p-3 px-5 flex flex-wrap items-center justify-between gap-3 shadow-md">
       <div class="flex items-center space-x-3">
         <span class="text-xl">⚽</span>
@@ -137,7 +137,7 @@
                 <option value="Fitness">Fitness</option>
               </select>
             </div>
-            <span id="bireyselCount" class="text-xs text-slate-500 font-semibold">Toplam: 2 Sporcu</span>
+            <span id="bireyselCount" class="text-xs text-slate-500 font-semibold">Toplam: 0 Sporcu</span>
           </div>
         </div>
 
@@ -157,7 +157,6 @@
               </tr>
             </thead>
             <tbody id="bireyselTableBody" class="divide-y divide-slate-200 bg-white text-slate-800">
-              <!-- Dinamik İçerik -->
             </tbody>
           </table>
         </div>
@@ -166,15 +165,104 @@
     </main>
 
     <!-- 2. FUTBOL OKULU SEKMESİ -->
-    <main id="tabFutbol" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-      <h2 class="text-sm font-bold text-slate-800 mb-2">Futbol Okulu Kayıtları</h2>
-      <p class="text-xs text-slate-500">Futbol okulu öğrencileri takibi bu bölümde yer almaktadır.</p>
+    <main id="tabFutbol" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+      
+      <!-- Futbol Okulu Sporcu Ekle Formu -->
+      <section>
+        <h2 class="text-sm font-bold text-slate-800 mb-3">Futbol Okulu Sporcu Ekle</h2>
+        <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+            <div class="md:col-span-5">
+              <label class="block text-[11px] text-slate-500 mb-1">Ad Soyad:</label>
+              <input type="text" id="futbolAd" placeholder="Ad Soyad" class="w-full text-xs px-3 py-2 border border-slate-300 rounded bg-white focus:outline-none">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-[11px] text-slate-500 mb-1">Doğum Tarihi:</label>
+              <input type="date" id="futbolDogum" class="w-full text-xs px-2 py-2 border border-slate-300 rounded bg-white focus:outline-none">
+            </div>
+            <div class="md:col-span-3">
+              <label class="block text-[11px] text-slate-500 mb-1">Veli / İletişim Telefon:</label>
+              <input type="text" id="futbolTel" placeholder="Telefon Numarası" class="w-full text-xs px-3 py-2 border border-slate-300 rounded bg-white focus:outline-none">
+            </div>
+            <div class="md:col-span-2">
+              <button onclick="addFutbol()" class="w-full bg-[#10b981] hover:bg-[#059669] text-white text-xs font-bold py-2 rounded transition shadow-sm">
+                Sporcu Kaydet
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Futbol Okulu Sporcu Listesi -->
+      <section>
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-bold text-slate-800">Futbol Okulu Sporcu Listesi</h2>
+          <span id="futbolCount" class="text-xs text-slate-500 font-semibold">Toplam: 0 Sporcu</span>
+        </div>
+
+        <div class="mb-3">
+          <input type="text" id="futbolSearch" oninput="renderFutbol()" placeholder="Futbol okulu listesinde isimle ara..." class="w-full text-xs px-3 py-2 border border-slate-300 rounded bg-white focus:outline-none">
+        </div>
+
+        <div class="overflow-x-auto border border-slate-200 rounded">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200 uppercase">
+                <th class="py-2.5 px-4 border-r border-slate-200 w-1/3">AD SOYAD</th>
+                <th class="py-2.5 px-4 border-r border-slate-200 text-center w-1/4">DOĞUM TARİHİ</th>
+                <th class="py-2.5 px-4 border-r border-slate-200 text-center w-1/3">İLETİŞİM</th>
+                <th class="py-2.5 px-4 text-center w-1/12">İŞLEM</th>
+              </tr>
+            </thead>
+            <tbody id="futbolTableBody" class="divide-y divide-slate-200 bg-white text-slate-800">
+            </tbody>
+          </table>
+        </div>
+      </section>
+
     </main>
 
     <!-- 3. AİDAT ÇİZELGESİ SEKMESİ -->
-    <main id="tabAidat" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-      <h2 class="text-sm font-bold text-slate-800 mb-2">Aidat Çizelgesi</h2>
-      <p class="text-xs text-slate-500">Aylık aidat ödemeleri takibi bu bölümde yer almaktadır.</p>
+    <main id="tabAidat" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-2">
+        <div>
+          <h2 class="text-sm font-bold text-slate-800">Aidat Çizelgesi ve Aylık Takip</h2>
+          <p class="text-[11px] text-slate-500">Kayıtlı sporcuların aylık aidat ödemelerini butonlara tıklayarak güncelleyebilirsiniz.</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <label class="text-xs font-bold text-slate-700">Grup Filtrele:</label>
+          <select id="aidatGroupFilter" onchange="renderAidat()" class="text-xs border border-slate-300 rounded px-2 py-1 bg-white focus:outline-none">
+            <option value="ALL">Tüm Sporcular</option>
+            <option value="bireysel">Sadece Bireysel</option>
+            <option value="futbol">Sadece Futbol Okulu</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto border border-slate-200 rounded max-h-[500px]">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead class="sticky top-0 bg-slate-100 text-slate-700 font-bold border-b border-slate-200 uppercase z-10">
+            <tr>
+              <th class="py-2.5 px-3 border-r border-slate-200 min-w-[150px]">AD SOYAD</th>
+              <th class="py-2.5 px-2 border-r border-slate-200 text-center min-w-[80px]">KATEGORİ</th>
+              <th class="py-2.5 px-1 border-r border-slate-200 text-center w-14">OCAK</th>
+              <th class="py-2.5 px-1 border-r border-slate-200 text-center w-14">ŞUBAT</th>
+              <th class="py-2.5 px-1 border-r border-slate-200 text-center w-14">MART</th>
+              <th class="py-2.5 px-1 border-r border-slate-200 text-center w-14">NİSAN</th>
+              <th class="py-2.5 px-1 border-r border-slate-200 text-center w-14">MAYIS</th>
+              <th class="py-2.5 px-1 border-r border-slate-200 text-center w-14">HAZ.</th>
+              <th class="py-2.5 px-1 border-r border-slate-200 text-center w-14">TEM.</th>
+              <th class="py-2.5 px-1 border-r border-slate-200 text-center w-14">AĞU.</th>
+              <th class="py-2.5 px-1 border-r border-slate-200 text-center w-14">EYL.</th>
+              <th class="py-2.5 px-1 border-r border-slate-200 text-center w-14">EKİM</th>
+              <th class="py-2.5 px-1 border-r border-slate-200 text-center w-14">KAS.</th>
+              <th class="py-2.5 px-1 text-center w-14">ARA.</th>
+            </tr>
+          </thead>
+          <tbody id="aidatTableBody" class="divide-y divide-slate-200 bg-white text-slate-800">
+          </tbody>
+        </table>
+      </div>
     </main>
 
   </div>
@@ -206,7 +294,7 @@
   </div>
 
   <script>
-    // --- 1. OTURUM VE ŞİFRE YÖNETİMİ ---
+    // --- 1. OTURUM KONTROLÜ ---
     const defaultUsers = { "admin": "1234", "yonetici": "5678" };
     let allowedUsers = JSON.parse(localStorage.getItem("club_users_orig")) || defaultUsers;
 
@@ -240,20 +328,23 @@
       document.getElementById("loginOverlay").classList.add("hidden");
       document.getElementById("mainContent").classList.remove("hidden");
       renderBireysel();
+      renderFutbol();
+      renderAidat();
     }
 
-    // --- 2. BİREYSEL KAYITLAR VERİSİ ---
+    // --- 2. BİREYSEL SPORCULAR ---
     let bireyselAthletes = JSON.parse(localStorage.getItem("club_bireysel_orig")) || [
-      { id: 1, name: "Halil Sine", branch: "Boks", birth: "2008-01-31", phone: "5466630437" },
-      { id: 2, name: "Musa Sine", branch: "Genel", birth: "1998-07-23", phone: "5466630438" }
+      { id: 101, name: "Halil Sine", branch: "Boks", birth: "2008-01-31", phone: "5466630437" },
+      { id: 102, name: "Musa Sine", branch: "Genel", birth: "1998-07-23", phone: "5466630438" }
     ];
 
     function saveBireysel() {
       localStorage.setItem("club_bireysel_orig", JSON.stringify(bireyselAthletes));
+      renderAidat();
     }
 
     function formatDate(dStr) {
-      if(!dStr) return "";
+      if(!dStr) return "-";
       const parts = dStr.split("-");
       if(parts.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
       return dStr;
@@ -324,7 +415,118 @@
       }
     }
 
-    // --- 3. SEKME GEÇİŞLERİ ---
+    // --- 3. FUTBOL OKULU SPORCULARI ---
+    let futbolAthletes = JSON.parse(localStorage.getItem("club_futbol_orig")) || [
+      { id: 201, name: "Ali Yılmaz", birth: "2014-05-12", phone: "5320001122" }
+    ];
+
+    function saveFutbol() {
+      localStorage.setItem("club_futbol_orig", JSON.stringify(futbolAthletes));
+      renderAidat();
+    }
+
+    function renderFutbol() {
+      const tbody = document.getElementById("futbolTableBody");
+      const search = document.getElementById("futbolSearch").value.toLowerCase();
+
+      tbody.innerHTML = "";
+
+      const filtered = futbolAthletes.filter(a => a.name.toLowerCase().includes(search));
+      document.getElementById("futbolCount").innerText = `Toplam: ${filtered.length} Sporcu`;
+
+      filtered.forEach(a => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-50";
+
+        tr.innerHTML = `
+          <td class="py-2.5 px-4 font-bold border-r border-slate-200">${a.name}</td>
+          <td class="py-2.5 px-4 text-center border-r border-slate-200 font-medium">${formatDate(a.birth)}</td>
+          <td class="py-2.5 px-4 text-center border-r border-slate-200 font-medium">${a.phone}</td>
+          <td class="py-2.5 px-4 text-center">
+            <button onclick="deleteFutbol(${a.id})" class="bg-[#ef4444] hover:bg-[#dc2626] text-white text-[11px] font-bold px-3 py-1 rounded transition">
+              Sil
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function addFutbol() {
+      const name = document.getElementById("futbolAd").value.trim();
+      const birth = document.getElementById("futbolDogum").value;
+      const phone = document.getElementById("futbolTel").value.trim();
+
+      if(!name) { alert("Lütfen Ad Soyad giriniz!"); return; }
+
+      futbolAthletes.push({ id: Date.now(), name, birth, phone });
+      saveFutbol();
+      renderFutbol();
+
+      document.getElementById("futbolAd").value = "";
+      document.getElementById("futbolDogum").value = "";
+      document.getElementById("futbolTel").value = "";
+    }
+
+    function deleteFutbol(id) {
+      if(confirm("Bu sporcuyu silmek istediğinize emin misiniz?")) {
+        futbolAthletes = futbolAthletes.filter(a => a.id !== id);
+        saveFutbol();
+        renderFutbol();
+      }
+    }
+
+    // --- 4. AİDAT TAKİP ÇİZELGESİ ---
+    let aidatRecords = JSON.parse(localStorage.getItem("club_aidat_orig")) || {};
+
+    function toggleAidat(athleteId, monthIndex) {
+      const key = `${athleteId}_${monthIndex}`;
+      aidatRecords[key] = !aidatRecords[key];
+      localStorage.setItem("club_aidat_orig", JSON.stringify(aidatRecords));
+      renderAidat();
+    }
+
+    function renderAidat() {
+      const tbody = document.getElementById("aidatTableBody");
+      const groupFilter = document.getElementById("aidatGroupFilter").value;
+      tbody.innerHTML = "";
+
+      let allAthletes = [];
+      if(groupFilter === "ALL" || groupFilter === "bireysel") {
+        allAthletes = allAthletes.concat(bireyselAthletes.map(a => ({ ...a, group: 'Bireysel' })));
+      }
+      if(groupFilter === "ALL" || groupFilter === "futbol") {
+        allAthletes = allAthletes.concat(futbolAthletes.map(a => ({ ...a, group: 'Futbol Okulu' })));
+      }
+
+      allAthletes.forEach(a => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-50";
+
+        let monthTds = "";
+        for(let m = 1; m <= 12; m++) {
+          const isPaid = !!aidatRecords[`${a.id}_${m}`];
+          monthTds += `
+            <td class="py-2 px-1 text-center border-r border-slate-200">
+              <button onclick="toggleAidat(${a.id}, ${m})" class="w-full text-[10px] font-bold py-1 rounded transition ${isPaid ? 'bg-emerald-500 text-white' : 'bg-red-100 text-red-600 hover:bg-red-200'}">
+                ${isPaid ? 'ÖDENDİ' : 'NO'}
+              </button>
+            </td>
+          `;
+        }
+
+        tr.innerHTML = `
+          <td class="py-2 px-3 font-bold border-r border-slate-200">${a.name}</td>
+          <td class="py-2 px-2 text-center border-r border-slate-200">
+            <span class="text-[10px] px-1.5 py-0.5 rounded ${a.group === 'Bireysel' ? 'bg-indigo-100 text-indigo-700' : 'bg-emerald-100 text-emerald-700'} font-semibold">${a.group}</span>
+          </td>
+          ${monthTds}
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // --- 5. SEKME GEÇİŞLERİ ---
     function switchTab(tab) {
       document.getElementById("tabBireysel").classList.add("hidden");
       document.getElementById("tabFutbol").classList.add("hidden");
@@ -346,7 +548,7 @@
       }
     }
 
-    // --- 4. KULLANICI YÖNETİMİ MODALI ---
+    // --- 6. KULLANICI MODALI & YEDEK ---
     function openUserManageModal() {
       renderUserList();
       document.getElementById("userManageModal").classList.remove("hidden");
