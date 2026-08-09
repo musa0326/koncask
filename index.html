@@ -3,24 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spor Kulübü - Aidat ve Sporcu Takip Paneli</title>
-
-  <!-- Tailwind CSS & FontAwesome Icons -->
+  <title>Spor Kulübü Yönetim Paneli</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
   <style>
-    .no-select { user-select: none; }
-    .sticky-col { position: sticky; left: 0; background-color: white; z-index: 10; }
-    .shadow-right { box-shadow: 3px 0 5px -2px rgba(0,0,0,0.1); }
+    body { background-color: #f1f5f9; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    .nav-btn { transition: all 0.2s; }
+    .nav-btn.active { background-color: #10b981; color: white; font-weight: 700; }
+    .nav-btn.inactive { background-color: #e2e8f0; color: #475569; }
+    .nav-btn.inactive:hover { background-color: #cbd5e1; }
   </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 font-sans">
+<body class="p-4 md:p-8">
 
-  <!-- GİRİŞ EKRANI (AUTH MODAL) -->
+  <!-- 1. ŞİFRELİ GİRİŞ EKRANI (OVERLAY) -->
   <div id="loginOverlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full border border-slate-200 text-center">
-      <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+      <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
         <i class="fa-solid fa-user-shield"></i>
       </div>
       <h2 class="text-2xl font-bold text-slate-800 mb-1">Paneline Giriş Yap</h2>
@@ -34,7 +33,7 @@
               <i class="fa-solid fa-user"></i>
             </span>
             <input type="text" id="usernameInput" placeholder="Örn: admin" 
-                   class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                   class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
           </div>
         </div>
 
@@ -45,7 +44,7 @@
               <i class="fa-solid fa-lock"></i>
             </span>
             <input type="password" id="passwordInput" placeholder="••••••••" 
-                   class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
                    onkeydown="if(event.key==='Enter') login();">
           </div>
         </div>
@@ -54,246 +53,224 @@
           Kullanıcı adı veya şifre hatalı!
         </div>
 
-        <button onclick="login()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+        <button onclick="login()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 rounded-lg transition duration-200 flex items-center justify-center gap-2 text-sm shadow">
           <i class="fa-solid fa-right-to-bracket"></i> Giriş Yap
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ANA PANEL -->
-  <div id="mainContent" class="hidden">
-    <!-- Üst Bar / Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold text-xl shadow">
-            <i class="fa-solid fa-trophy"></i>
-          </div>
-          <div>
-            <h1 class="text-xl font-bold text-slate-800">Spor Kulübü Yönetim Paneli</h1>
-            <p class="text-xs text-slate-500">Aidat ve Sporcu Takip Sistemi</p>
-          </div>
-        </div>
+  <!-- 2. ANA PANEL UYGULAMASI -->
+  <div id="mainContent" class="hidden max-w-6xl mx-auto space-y-6">
 
-        <!-- Kullanıcı Durumu & Eylemler -->
-        <div class="flex items-center space-x-3 self-end md:self-auto">
-          <div class="bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 flex items-center gap-2">
-            <i class="fa-solid fa-circle-user text-blue-600 text-sm"></i>
-            <span>Giriş Yapan: <strong id="loggedInUserDisplay" class="text-slate-800">Admin</strong></span>
-          </div>
-          
-          <!-- Kullanıcı Yönetimi Butonu -->
-          <button onclick="openUserManageModal()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-3 py-1.5 rounded-lg border border-slate-300 transition flex items-center gap-1.5">
-            <i class="fa-solid fa-users-gear"></i> Kullanıcılar
-          </button>
+    <!-- ÜST KOYU HEADER -->
+    <header class="bg-[#1e293b] text-white rounded-xl p-4 px-6 flex flex-wrap items-center justify-between gap-4 shadow-md">
+      <div class="flex items-center space-x-3">
+        <span class="text-2xl">⚽</span>
+        <h1 class="text-xl font-bold tracking-wide">Spor Kulübü Yönetim Paneli</h1>
+      </div>
 
-          <!-- Çıkış Yap -->
-          <button onclick="logout()" class="text-xs bg-red-50 hover:bg-red-100 text-red-600 font-semibold px-3 py-1.5 rounded-lg border border-red-200 transition flex items-center gap-1">
-            <i class="fa-solid fa-power-off"></i> Çıkış
-          </button>
-        </div>
-
+      <div class="flex items-center space-x-2">
+        <!-- PDF İndir -->
+        <button onclick="window.print()" class="bg-[#0284c7] hover:bg-[#0369a1] text-white text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-file-pdf"></i> PDF İndir / Yazdır
+        </button>
+        <!-- Veri Yedeği İndir -->
+        <button onclick="exportBackup()" class="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-floppy-disk"></i> Veri Yedeği İndir
+        </button>
+        <!-- Kullanıcı Yönetimi -->
+        <button onclick="openUserManageModal()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-users-gear"></i> Kullanıcılar
+        </button>
+        <!-- Çıkış Yap -->
+        <button onclick="logout()" class="bg-[#ef4444] hover:bg-[#dc2626] text-white text-xs font-bold px-3 py-2 rounded-lg transition">
+          Çıkış Yap
+        </button>
       </div>
     </header>
 
-    <!-- İçerik Alanı -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <!-- SEKME BUTONLARI -->
+    <nav class="flex items-center space-x-3">
+      <button id="tabBtn1" onclick="switchTab('bireysel')" class="nav-btn active px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-sm">
+        <span>🏋️</span> Bireysel Kayıtlar
+      </button>
+      <button id="tabBtn2" onclick="switchTab('futbol')" class="nav-btn inactive px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-sm">
+        <span>⚽</span> Futbol Okulu
+      </button>
+      <button id="tabBtn3" onclick="switchTab('aidat')" class="nav-btn inactive px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-sm">
+        <span>📋</span> AİDAT ÇİZELGESİ
+      </button>
+    </nav>
+
+    <!-- BİREYSEL KAYITLAR SEKMESİ -->
+    <main id="tabBireysel" class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-8">
       
-      <!-- Kontrol ve Filtre Barları -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        
-        <!-- Sol Taraf: Filtreler & Arama -->
-        <div class="flex flex-wrap items-center gap-3">
-          <!-- Arama -->
-          <div class="relative">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-              <i class="fa-solid fa-magnifying-glass text-xs"></i>
-            </span>
-            <input type="text" id="searchInput" oninput="renderTable()" placeholder="Sporcu ara..." 
-                   class="pl-8 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 w-44">
+      <!-- Bireysel Sporcu Ekle Formu -->
+      <section>
+        <h2 class="text-base font-bold text-slate-800 mb-3">Bireysel Sporcu Ekle</h2>
+        <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+            <div class="md:col-span-4">
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Ad Soyad:</label>
+              <input type="text" id="bireyselAd" placeholder="Ad Soyad" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 bg-white">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Branş Seçin:</label>
+              <select id="bireyselBrans" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 bg-white">
+                <option value="Yüzme">Yüzme</option>
+                <option value="Fitness">Fitness</option>
+                <option value="Boks">Boks</option>
+                <option value="Futbol">Futbol</option>
+                <option value="Basketbol">Basketbol</option>
+                <option value="Voleybol">Voleybol</option>
+                <option value="Taekwondo">Taekwondo</option>
+                <option value="Jimnastik">Jimnastik</option>
+                <option value="Genel">Genel</option>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Doğum Tarihi:</label>
+              <input type="date" id="bireyselDogum" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 bg-white">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">Telefon:</label>
+              <input type="text" id="bireyselTel" placeholder="Telefon Numarası" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-emerald-500 bg-white">
+            </div>
+            <div class="md:col-span-2">
+              <button onclick="addAthlete('bireysel')" class="w-full bg-[#10b981] hover:bg-[#059669] text-white text-xs font-bold py-2.5 rounded-lg transition shadow-sm">
+                Sporcu Kaydet
+              </button>
+            </div>
           </div>
+        </div>
+      </section>
 
-          <!-- Branş Filtresi -->
-          <select id="branchFilter" onchange="renderTable()" class="text-xs border border-slate-300 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
-            <option value="ALL">Tüm Branşlar</option>
-            <option value="Yüzme">Yüzme</option>
-            <option value="Fitness">Fitness</option>
-            <option value="Boks">Boks</option>
-            <option value="Futbol">Futbol</option>
-            <option value="Basketbol">Basketbol</option>
-            <option value="Voleybol">Voleybol</option>
-            <option value="Taekwondo">Taekwondo</option>
-            <option value="Jimnastik">Jimnastik</option>
-          </select>
-
-          <!-- Yıl Seçimi -->
-          <select id="yearSelect" onchange="renderTable()" class="text-xs border border-slate-300 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
-            <option value="2026" selected>2026 Sezonu</option>
-            <option value="2025">2025 Sezonu</option>
-          </select>
+      <!-- Bireysel Sporcu Listesi -->
+      <section>
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-base font-bold text-slate-800">Bireysel Sporcu Listesi</h2>
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-1.5">
+              <span class="text-xs font-bold text-slate-700">Branş Filtrele:</span>
+              <select id="bireyselFilterBrans" onchange="renderBireyselTable()" class="text-xs border border-slate-300 rounded-md px-2 py-1 bg-white focus:outline-none">
+                <option value="ALL">TÜM BRANŞLAR</option>
+                <option value="Yüzme">Yüzme</option>
+                <option value="Fitness">Fitness</option>
+                <option value="Boks">Boks</option>
+                <option value="Futbol">Futbol</option>
+                <option value="Basketbol">Basketbol</option>
+                <option value="Voleybol">Voleybol</option>
+                <option value="Taekwondo">Taekwondo</option>
+                <option value="Jimnastik">Jimnastik</option>
+                <option value="Genel">Genel</option>
+              </select>
+            </div>
+            <span id="bireyselCount" class="text-xs font-bold text-slate-500">Toplam: 2 Sporcu</span>
+          </div>
         </div>
 
-        <!-- Sağ Taraf: Eylemler -->
-        <div class="flex items-center gap-2">
-          <button onclick="openAddModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm">
-            <i class="fa-solid fa-user-plus"></i> Yeni Sporcu Ekle
-          </button>
+        <div class="mb-3">
+          <input type="text" id="bireyselSearch" oninput="renderBireyselTable()" placeholder="Bireysel listesinde isimle ara..." class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none bg-white">
         </div>
-      </div>
 
-      <!-- Tablo Konteyneri -->
-      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto border border-slate-200 rounded-lg">
           <table class="w-full text-left text-xs border-collapse">
             <thead>
-              <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider">
-                <th class="py-3 px-4 sticky-col shadow-right">Sporcu Adı</th>
-                <th class="py-3 px-3">Branş</th>
-                <th class="py-3 px-2 text-center">Oca</th>
-                <th class="py-3 px-2 text-center">Şub</th>
-                <th class="py-3 px-2 text-center">Mar</th>
-                <th class="py-3 px-2 text-center">Nis</th>
-                <th class="py-3 px-2 text-center">May</th>
-                <th class="py-3 px-2 text-center">Haz</th>
-                <th class="py-3 px-2 text-center">Tem</th>
-                <th class="py-3 px-2 text-center">Ağu</th>
-                <th class="py-3 px-2 text-center">Eyl</th>
-                <th class="py-3 px-2 text-center">Eki</th>
-                <th class="py-3 px-2 text-center">Kas</th>
-                <th class="py-3 px-2 text-center">Ara</th>
-                <th class="py-3 px-3 text-center">İşlem</th>
+              <tr class="bg-slate-100 text-slate-700 font-bold uppercase border-b border-slate-200">
+                <th class="py-2.5 px-4 border-r border-slate-200 w-1/4">AD SOYAD</th>
+                <th class="py-2.5 px-4 border-r border-slate-200 text-center w-1/6">BRANŞ</th>
+                <th class="py-2.5 px-4 border-r border-slate-200 text-center w-1/4">DOĞUM TARİHİ</th>
+                <th class="py-2.5 px-4 border-r border-slate-200 text-center w-1/4">İLETİŞİM</th>
+                <th class="py-2.5 px-4 text-center w-1/12">İŞLEM</th>
               </tr>
             </thead>
-            <tbody id="athleteTableBody" class="divide-y divide-slate-100 text-slate-700">
-              <!-- Dinamik Veriler Buraya Gelecek -->
+            <tbody id="bireyselTableBody" class="divide-y divide-slate-200 bg-white text-slate-800">
+              <!-- Dinamik İçerik -->
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
     </main>
-  </div>
 
-  <!-- SPORCU EKLE/DÜZENLE MODAL -->
-  <div id="athleteModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-xl p-6 max-w-sm w-full border border-slate-200">
-      <h3 id="modalTitle" class="text-base font-bold text-slate-800 mb-4">Yeni Sporcu Ekle</h3>
-      <input type="hidden" id="editAthleteId">
+    <!-- FUTBOL OKULU SEKMESİ -->
+    <main id="tabFutbol" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+      <h2 class="text-base font-bold text-slate-800">Futbol Okulu Kayıtları</h2>
+      <p class="text-xs text-slate-500">Futbol okulu öğrenci ve veli takip paneli.</p>
+    </main>
 
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1">Sporcu Adı Soyadı</label>
-          <input type="text" id="athleteNameInput" placeholder="Örn: Ahmet Yılmaz" 
-                 class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500">
-        </div>
+    <!-- AİDAT ÇİZELGESİ SEKMESİ -->
+    <main id="tabAidat" class="hidden bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-6">
+      <h2 class="text-base font-bold text-slate-800">Aidat Çizelgesi ve Aylık Takip</h2>
+      <p class="text-xs text-slate-500">Tüm branşlardaki sporcuların aylık aidat ödemeleri.</p>
+    </main>
 
-        <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1">Branş</label>
-          <select id="athleteBranchInput" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
-            <option value="Yüzme">Yüzme</option>
-            <option value="Fitness">Fitness</option>
-            <option value="Boks">Boks</option>
-            <option value="Futbol">Futbol</option>
-            <option value="Basketbol">Basketbol</option>
-            <option value="Voleybol">Voleybol</option>
-            <option value="Taekwondo">Taekwondo</option>
-            <option value="Jimnastik">Jimnastik</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-end gap-2 mt-6">
-        <button onclick="closeModal()" class="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">İptal</button>
-        <button onclick="saveAthlete()" class="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg">Kaydet</button>
-      </div>
-    </div>
   </div>
 
   <!-- KULLANICI YÖNETİMİ MODALI -->
   <div id="userManageModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-xl p-6 max-w-md w-full border border-slate-200">
+    <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md w-full border border-slate-200">
       <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
         <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
-          <i class="fa-solid fa-users-gear text-blue-600"></i> Kullanıcı Yönetimi
+          <i class="fa-solid fa-users-gear text-emerald-600"></i> Kullanıcı Yönetimi
         </h3>
         <button onclick="closeUserManageModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <!-- Yeni Kullanıcı Ekleme Formu -->
-      <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 mb-4 space-y-2">
+      <!-- Yeni Kullanıcı Ekleme -->
+      <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-4 space-y-2">
         <p class="text-xs font-bold text-slate-700">Yeni Kullanıcı Oluştur</p>
         <div class="grid grid-cols-2 gap-2">
-          <input type="text" id="newUsername" placeholder="Kullanıcı Adı" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
-          <input type="password" id="newPassword" placeholder="Şifre" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
+          <input type="text" id="newUsername" placeholder="Kullanıcı Adı" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none">
+          <input type="password" id="newPassword" placeholder="Şifre" class="text-xs px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none">
         </div>
-        <button onclick="addNewUser()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold py-1.5 rounded transition">
+        <button onclick="addNewUser()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-lg transition">
           + Kullanıcıyı Ekle
         </button>
       </div>
 
-      <!-- Mevcut Kullanıcı Listesi -->
+      <!-- Tanımlı Kullanıcı Listesi -->
       <div>
         <p class="text-xs font-bold text-slate-700 mb-2">Tanımlı Kullanıcılar</p>
         <div id="userListContainer" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-          <!-- Dinamik Kullanıcılar -->
+          <!-- Dinamik Liste -->
         </div>
       </div>
 
       <div class="mt-6 text-right">
-        <button onclick="closeUserManageModal()" class="px-4 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">Kapat</button>
+        <button onclick="closeUserManageModal()" class="px-4 py-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">Kapat</button>
       </div>
     </div>
   </div>
 
-  <!-- JAVASCRIPT MANTIĞI -->
+  <!-- JAVASCRIPT KODLARI -->
   <script>
     // ----------------------------------------------------
-    // 1. VARSAYILAN VE KAYITLI KULLANICILAR
+    // 1. KULLANICILAR VE OTURUM YÖNETİMİ
     // ----------------------------------------------------
-    const defaultUsers = {
-      "admin": "1234",
-      "yonetici": "5678"
-    };
-
+    const defaultUsers = { "admin": "1234", "yonetici": "5678" };
     let allowedUsers = JSON.parse(localStorage.getItem("club_users")) || defaultUsers;
 
-    const MONTHS = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
-
-    // Örnek Başlangıç Verileri
-    let athletes = JSON.parse(localStorage.getItem("club_athletes")) || [
-      { id: 1, name: "Ali Yılmaz", branch: "Yüzme", payments: { "2026": { "Oca": true, "Şub": true, "Mar": false } } },
-      { id: 2, name: "Ayşe Kaya", branch: "Fitness", payments: { "2026": { "Oca": true, "Şub": false } } },
-      { id: 3, name: "Mehmet Demir", branch: "Boks", payments: { "2026": {} } }
-    ];
-
-    // ----------------------------------------------------
-    // 2. KULLANICI GİRİŞ VE OTURUM KONTROLÜ
-    // ----------------------------------------------------
     window.onload = function() {
-      saveUsersToStorage();
+      localStorage.setItem("club_users", JSON.stringify(allowedUsers));
       const activeUser = localStorage.getItem("club_active_user");
       if (activeUser) {
-        showMainApp(activeUser);
+        showMainApp();
       }
     };
 
-    function saveUsersToStorage() {
-      localStorage.setItem("club_users", JSON.stringify(allowedUsers));
-    }
-
     function login() {
-      const userVal = document.getElementById("usernameInput").value.trim().toLowerCase();
-      const passVal = document.getElementById("passwordInput").value.trim();
-      const errEl = document.getElementById("loginError");
+      const u = document.getElementById("usernameInput").value.trim().toLowerCase();
+      const p = document.getElementById("passwordInput").value.trim();
+      const err = document.getElementById("loginError");
 
-      if (allowedUsers[userVal] && allowedUsers[userVal] === passVal) {
-        errEl.classList.add("hidden");
-        localStorage.setItem("club_active_user", userVal);
-        showMainApp(userVal);
+      if (allowedUsers[u] && allowedUsers[u] === p) {
+        err.classList.add("hidden");
+        localStorage.setItem("club_active_user", u);
+        showMainApp();
       } else {
-        errEl.classList.remove("hidden");
+        err.classList.remove("hidden");
       }
     }
 
@@ -305,15 +282,14 @@
       document.getElementById("passwordInput").value = "";
     }
 
-    function showMainApp(username) {
+    function showMainApp() {
       document.getElementById("loginOverlay").classList.add("hidden");
       document.getElementById("mainContent").classList.remove("hidden");
-      document.getElementById("loggedInUserDisplay").innerText = username.toUpperCase();
-      renderTable();
+      renderBireyselTable();
     }
 
     // ----------------------------------------------------
-    // 3. KULLANICI YÖNETİMİ İŞLEMLERİ
+    // 2. KULLANICI YÖNETİMİ MODAL İŞLEMLERİ
     // ----------------------------------------------------
     function openUserManageModal() {
       renderUserList();
@@ -331,7 +307,6 @@
       Object.keys(allowedUsers).forEach(u => {
         const div = document.createElement("div");
         div.className = "flex items-center justify-between bg-white border border-slate-200 px-3 py-2 rounded-lg text-xs";
-        
         div.innerHTML = `
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-user text-slate-400"></i>
@@ -344,7 +319,6 @@
             </button>
           ` : '<span class="text-[10px] text-slate-400 italic">Ana Yönetici</span>'}
         `;
-
         container.appendChild(div);
       });
     }
@@ -353,175 +327,144 @@
       const u = document.getElementById("newUsername").value.trim().toLowerCase();
       const p = document.getElementById("newPassword").value.trim();
 
-      if (!u || !p) {
-        alert("Lütfen hem kullanıcı adı hem de şifre giriniz!");
-        return;
-      }
-
-      if (allowedUsers[u]) {
-        alert("Bu kullanıcı adı zaten mevcut!");
-        return;
-      }
+      if (!u || !p) { alert("Lütfen kullanıcı adı ve şifre giriniz!"); return; }
+      if (allowedUsers[u]) { alert("Bu kullanıcı adı zaten var!"); return; }
 
       allowedUsers[u] = p;
-      saveUsersToStorage();
+      localStorage.setItem("club_users", JSON.stringify(allowedUsers));
       renderUserList();
-
       document.getElementById("newUsername").value = "";
       document.getElementById("newPassword").value = "";
     }
 
-    function deleteUser(username) {
-      if (confirm(`"${username}" kullanıcısını silmek istediğinize emin misiniz?`)) {
-        delete allowedUsers[username];
-        saveUsersToStorage();
+    function deleteUser(u) {
+      if (confirm(`"${u}" kullanıcısını silmek istediğinize emin misiniz?`)) {
+        delete allowedUsers[u];
+        localStorage.setItem("club_users", JSON.stringify(allowedUsers));
         renderUserList();
       }
     }
 
     // ----------------------------------------------------
-    // 4. TABLO VE VERİ YÖNETİMİ
+    // 3. SPORCU KAYITLARI & TABLO MANTIĞI
     // ----------------------------------------------------
-    function saveData() {
-      localStorage.setItem("club_athletes", JSON.stringify(athletes));
+    let bireyselAthletes = JSON.parse(localStorage.getItem("club_bireysel")) || [
+      { id: 1, name: "Halil Sine", branch: "Boks", birth: "2008-01-31", phone: "5466630437" },
+      { id: 2, name: "Musa Sine", branch: "Genel", birth: "1998-07-23", phone: "5466630438" }
+    ];
+
+    function saveBireysel() {
+      localStorage.setItem("club_bireysel", JSON.stringify(bireyselAthletes));
     }
 
-    function renderTable() {
-      const tbody = document.getElementById("athleteTableBody");
-      const searchVal = document.getElementById("searchInput").value.toLowerCase();
-      const branchVal = document.getElementById("branchFilter").value;
-      const yearVal = document.getElementById("yearSelect").value;
+    function formatDate(dStr) {
+      if(!dStr) return "";
+      const parts = dStr.split("-");
+      if(parts.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
+      return dStr;
+    }
+
+    function renderBireyselTable() {
+      const tbody = document.getElementById("bireyselTableBody");
+      const searchVal = document.getElementById("bireyselSearch").value.toLowerCase();
+      const filterBrans = document.getElementById("bireyselFilterBrans").value;
 
       tbody.innerHTML = "";
 
-      const filtered = athletes.filter(a => {
-        const matchesName = a.name.toLowerCase().includes(searchVal);
-        const matchesBranch = (branchVal === "ALL" || a.branch === branchVal);
-        return matchesName && matchesBranch;
+      const filtered = bireyselAthletes.filter(a => {
+        const matchName = a.name.toLowerCase().includes(searchVal);
+        const matchBrans = (filterBrans === "ALL" || a.branch === filterBrans);
+        return matchName && matchBrans;
       });
 
-      if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="15" class="py-6 text-center text-slate-400">Aranan kriterlere uygun sporcu bulunamadı.</td></tr>`;
-        return;
-      }
+      document.getElementById("bireyselCount").innerText = `Toplam: ${filtered.length} Sporcu`;
 
-      filtered.forEach(athlete => {
+      filtered.forEach(a => {
         const tr = document.createElement("tr");
-        tr.className = "hover:bg-slate-50 transition";
+        tr.className = "hover:bg-slate-50";
 
-        // Sporcu Adı
-        let html = `
-          <td class="py-2.5 px-4 font-semibold text-slate-800 sticky-col shadow-right">${athlete.name}</td>
-          <td class="py-2.5 px-3 text-slate-500 font-medium">${athlete.branch}</td>
-        `;
+        // Rozet Rengi
+        let badgeBg = "bg-sky-500";
+        if(a.branch === "Boks") badgeBg = "bg-sky-500";
+        if(a.branch === "Genel") badgeBg = "bg-sky-600";
+        if(a.branch === "Yüzme") badgeBg = "bg-blue-500";
 
-        // Ay Kutucukları (Ödeme Butonları)
-        MONTHS.forEach(month => {
-          const isPaid = athlete.payments?.[yearVal]?.[month] || false;
-          const bgClass = isPaid ? "bg-emerald-500 text-white hover:bg-emerald-600" : "bg-slate-200 text-slate-400 hover:bg-slate-300";
-          const icon = isPaid ? '<i class="fa-solid fa-check text-xs"></i>' : '<i class="fa-solid fa-minus text-xs"></i>';
-
-          html += `
-            <td class="py-2.5 px-2 text-center">
-              <button onclick="togglePayment(${athlete.id}, '${yearVal}', '${month}')" 
-                      class="w-7 h-7 rounded-md ${bgClass} transition flex items-center justify-center mx-auto shadow-sm">
-                ${icon}
-              </button>
-            </td>
-          `;
-        });
-
-        // İşlemler
-        html += `
-          <td class="py-2.5 px-3 text-center">
-            <div class="flex items-center justify-center space-x-2">
-              <button onclick="openEditModal(${athlete.id})" class="text-slate-400 hover:text-blue-600 transition"><i class="fa-solid fa-pen-to-square"></i></button>
-              <button onclick="deleteAthlete(${athlete.id})" class="text-slate-400 hover:text-red-600 transition"><i class="fa-solid fa-trash"></i></button>
-            </div>
+        tr.innerHTML = `
+          <td class="py-2.5 px-4 font-bold border-r border-slate-200">${a.name}</td>
+          <td class="py-2.5 px-4 text-center border-r border-slate-200">
+            <span class="${badgeBg} text-white px-3 py-1 rounded-full text-[11px] font-semibold">${a.branch}</span>
+          </td>
+          <td class="py-2.5 px-4 text-center border-r border-slate-200 font-medium">${formatDate(a.birth)}</td>
+          <td class="py-2.5 px-4 text-center border-r border-slate-200 font-medium">${a.phone}</td>
+          <td class="py-2.5 px-4 text-center">
+            <button onclick="deleteBireysel(${a.id})" class="bg-[#ef4444] hover:bg-[#dc2626] text-white text-[11px] font-bold px-3 py-1 rounded transition">
+              Sil
+            </button>
           </td>
         `;
-
-        tr.innerHTML = html;
         tbody.appendChild(tr);
       });
     }
 
-    function togglePayment(athleteId, year, month) {
-      const athlete = athletes.find(a => a.id === athleteId);
-      if (!athlete) return;
+    function addAthlete(type) {
+      if(type === 'bireysel') {
+        const name = document.getElementById("bireyselAd").value.trim();
+        const branch = document.getElementById("bireyselBrans").value;
+        const birth = document.getElementById("bireyselDogum").value;
+        const phone = document.getElementById("bireyselTel").value.trim();
 
-      if (!athlete.payments) athlete.payments = {};
-      if (!athlete.payments[year]) athlete.payments[year] = {};
+        if(!name) { alert("Lütfen Ad Soyad giriniz!"); return; }
 
-      athlete.payments[year][month] = !athlete.payments[year][month];
-      saveData();
-      renderTable();
+        bireyselAthletes.push({ id: Date.now(), name, branch, birth, phone });
+        saveBireysel();
+        renderBireyselTable();
+
+        document.getElementById("bireyselAd").value = "";
+        document.getElementById("bireyselDogum").value = "";
+        document.getElementById("bireyselTel").value = "";
+      }
+    }
+
+    function deleteBireysel(id) {
+      if(confirm("Bu sporcuyu silmek istediğinize emin misiniz?")) {
+        bireyselAthletes = bireyselAthletes.filter(a => a.id !== id);
+        saveBireysel();
+        renderBireyselTable();
+      }
     }
 
     // ----------------------------------------------------
-    // 5. MODAL & EKLEME - SİLME İŞLEMLERİ
+    // 4. SEKME VE YEDEKLEME İŞLEMLERİ
     // ----------------------------------------------------
-    function openAddModal() {
-      document.getElementById("modalTitle").innerText = "Yeni Sporcu Ekle";
-      document.getElementById("editAthleteId").value = "";
-      document.getElementById("athleteNameInput").value = "";
-      document.getElementById("athleteModal").classList.remove("hidden");
-    }
+    function switchTab(tab) {
+      document.getElementById("tabBireysel").classList.add("hidden");
+      document.getElementById("tabFutbol").classList.add("hidden");
+      document.getElementById("tabAidat").classList.add("hidden");
 
-    function openEditModal(id) {
-      const athlete = athletes.find(a => a.id === id);
-      if (!athlete) return;
+      document.getElementById("tabBtn1").className = "nav-btn inactive px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-sm";
+      document.getElementById("tabBtn2").className = "nav-btn inactive px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-sm";
+      document.getElementById("tabBtn3").className = "nav-btn inactive px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-sm";
 
-      document.getElementById("modalTitle").innerText = "Sporcu Düzenle";
-      document.getElementById("editAthleteId").value = athlete.id;
-      document.getElementById("athleteNameInput").value = athlete.name;
-      document.getElementById("athleteBranchInput").value = athlete.branch;
-      document.getElementById("athleteModal").classList.remove("hidden");
-    }
-
-    function closeModal() {
-      document.getElementById("athleteModal").classList.add("hidden");
-    }
-
-    function saveAthlete() {
-      const name = document.getElementById("athleteNameInput").value.trim();
-      const branch = document.getElementById("athleteBranchInput").value;
-      const editId = document.getElementById("editAthleteId").value;
-
-      if (!name) {
-        alert("Lütfen sporcu adını giriniz!");
-        return;
+      if(tab === 'bireysel') {
+        document.getElementById("tabBireysel").classList.remove("hidden");
+        document.getElementById("tabBtn1").className = "nav-btn active px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-sm";
+      } else if(tab === 'futbol') {
+        document.getElementById("tabFutbol").classList.remove("hidden");
+        document.getElementById("tabBtn2").className = "nav-btn active px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-sm";
+      } else if(tab === 'aidat') {
+        document.getElementById("tabAidat").classList.remove("hidden");
+        document.getElementById("tabBtn3").className = "nav-btn active px-5 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow-sm";
       }
-
-      if (editId) {
-        // Güncelleme
-        const athlete = athletes.find(a => a.id == editId);
-        if (athlete) {
-          athlete.name = name;
-          athlete.branch = branch;
-        }
-      } else {
-        // Yeni Ekleme
-        const newAthlete = {
-          id: Date.now(),
-          name: name,
-          branch: branch,
-          payments: {}
-        };
-        athletes.push(newAthlete);
-      }
-
-      saveData();
-      renderTable();
-      closeModal();
     }
 
-    function deleteAthlete(id) {
-      if (confirm("Bu sporcuyu silmek istediğinize emin misiniz?")) {
-        athletes = athletes.filter(a => a.id !== id);
-        saveData();
-        renderTable();
-      }
+    function exportBackup() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(localStorage));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "kulup_paneli_yedek.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
     }
   </script>
 </body>
