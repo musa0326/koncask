@@ -27,7 +27,7 @@
       <div class="space-y-4 text-left">
         <div>
           <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Kullanıcı Adı</label>
-          <input type="text" id="usernameInput" placeholder="admin" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <input type="text" id="usernameInput" placeholder="Kullanıcı adı" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Şifre</label>
@@ -311,14 +311,24 @@
   </div>
 
   <script>
-    // OTURUM YÖNETİMİ
-    const defaultUsers = { "admin": "1234", "yonetici": "5678" };
-    let allowedUsers = JSON.parse(localStorage.getItem("club_users_orig")) || defaultUsers;
+    // OTURUM YÖNETİMİ (Yeni Kullanıcılar Tanımlandı)
+    const defaultUsers = {
+      "pnrknc": "9979",
+      "esindmrtk": "3264",
+      "mssne": "0438"
+    };
+
+    // Yeni kullanıcı listenin aktifleşmesi için key v2 olarak ayarlandı
+    let allowedUsers = JSON.parse(localStorage.getItem("club_users_v2")) || defaultUsers;
 
     window.onload = function() {
-      localStorage.setItem("club_users_orig", JSON.stringify(allowedUsers));
+      localStorage.setItem("club_users_v2", JSON.stringify(allowedUsers));
       const activeUser = localStorage.getItem("club_active_user_orig");
-      if (activeUser) { showMainApp(); }
+      if (activeUser && allowedUsers[activeUser]) { 
+        showMainApp(); 
+      } else {
+        logout();
+      }
     };
 
     function login() {
@@ -639,7 +649,7 @@
         div.className = "flex items-center justify-between bg-slate-50 border border-slate-200 px-3 py-1.5 rounded text-xs";
         div.innerHTML = `
           <span class="font-bold text-slate-700">${u}</span>
-          ${u !== 'admin' ? `<button onclick="deleteUser('${u}')" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>` : '<span class="text-[10px] text-slate-400">Admin</span>'}
+          <button onclick="deleteUser('${u}')" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
         `;
         container.appendChild(div);
       });
@@ -650,15 +660,19 @@
       const p = document.getElementById("newPassword").value.trim();
       if (!u || !p) { alert("Lütfen kullanıcı adı ve şifre girin!"); return; }
       allowedUsers[u] = p;
-      localStorage.setItem("club_users_orig", JSON.stringify(allowedUsers));
+      localStorage.setItem("club_users_v2", JSON.stringify(allowedUsers));
       renderUserList();
       document.getElementById("newUsername").value = "";
       document.getElementById("newPassword").value = "";
     }
 
     function deleteUser(u) {
+      if(Object.keys(allowedUsers).length <= 1) {
+        alert("Sistemde en az 1 aktif kullanıcı bulunmalıdır!");
+        return;
+      }
       delete allowedUsers[u];
-      localStorage.setItem("club_users_orig", JSON.stringify(allowedUsers));
+      localStorage.setItem("club_users_v2", JSON.stringify(allowedUsers));
       renderUserList();
     }
 
