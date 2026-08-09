@@ -2,55 +2,105 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Futbol Okulu Yönetim Paneli</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spor Kulübü Yönetim Paneli</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; padding: 20px; color: #334155; }
-        .container { max-width: 950px; margin: auto; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { padding: 10px 20px; cursor: pointer; border: none; border-radius: 6px; background: #e2e8f0; font-weight: bold; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8fafc; padding: 20px; color: #334155; margin: 0; }
+        .container { max-width: 1000px; margin: auto; }
+        
+        /* Şifre Giriş Ekranı Styles */
+        #login-screen {
+            max-width: 400px;
+            margin: 80px auto;
+            text-align: center;
+        }
+        
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .header-card { background: #1e293b; color: white; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .tab-btn { padding: 12px 24px; cursor: pointer; border: none; border-radius: 8px; background: #e2e8f0; font-weight: 600; color: #475569; transition: all 0.2s; white-space: nowrap; }
         .tab-btn.active { background: #10b981; color: white; }
         .section { display: none; }
         .section.active { display: block; }
-        input, select, button { padding: 10px; border: 1px solid #ddd; border-radius: 6px; margin: 5px; }
-        button { background: #10b981; color: white; border: none; cursor: pointer; font-weight: bold; }
-        button:hover { opacity: 0.9; }
+        .form-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; background: #f1f5f9; padding: 15px; border-radius: 8px; }
+        input, select, button { padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; }
+        input:focus { border-color: #10b981; box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2); }
+        button { background: #10b981; color: white; border: none; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+        button:hover { background: #059669; }
+        .btn-logout { background: #ef4444; font-size: 12px; padding: 6px 12px; }
+        .btn-logout:hover { background: #dc2626; }
+        .search-box { width: 100%; margin-bottom: 15px; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
-        th { background: #f1f5f9; }
+        th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+        th { background: #f8fafc; color: #64748b; font-size: 13px; text-transform: uppercase; }
         .btn-delete { background: #ef4444; padding: 6px 12px; font-size: 12px; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-delete:hover { background: #dc2626; }
+        .badge { background: #10b981; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .stats { display: flex; gap: 10px; margin-bottom: 15px; font-size: 14px; color: #64748b; }
+        @media (max-width: 600px) {
+            .form-group { flex-direction: column; }
+            input { width: 100% !important; }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="card" style="background: #1e293b; color: white; display: flex; justify-content: space-between; align-items: center;">
-        <h2>⚽ Futbol Okulu Yönetim Paneli</h2>
-        <span style="background: #10b981; padding: 5px 10px; border-radius: 5px; font-size: 13px;">Bağlı (Ortak)</span>
+<!-- GİRİŞ EKRANI -->
+<div id="login-screen" class="card">
+    <h2>🔒 Paneli Girişi</h2>
+    <p style="color: #64748b; font-size: 14px;">Lütfen devam etmek için yönetim şifresini giriniz.</p>
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+        <input type="password" id="passInput" placeholder="Şifre" onkeypress="if(event.key==='Enter') login()">
+        <button onclick="login()">Giriş Yap</button>
+    </div>
+</div>
+
+<!-- YÖNETİM PANELİ (Giriş Yapılınca Açılır) -->
+<div id="app-screen" class="container" style="display: none;">
+    <div class="card header-card">
+        <div>
+            <h2 style="margin: 0;">🥊⚽ Spor Kulübü Yönetim Paneli</h2>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="badge">Canlı Bağlantı</span>
+            <button class="btn-logout" onclick="logout()">Çıkış Yap</button>
+        </div>
     </div>
 
-    <!-- Üst Sekmeler -->
+    <!-- Sekmeler -->
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('bolum_bireysel', this)">Bireysel Kayıtlar</button>
         <button class="tab-btn" onclick="switchTab('bolum_okul', this)">Futbol Okulu</button>
+        <button class="tab-btn" onclick="switchTab('bolum_boks', this)">🥊 Boks Kulübü</button>
         <button class="tab-btn" onclick="switchTab('bolum_antrenman', this)">Antrenman Çizelgesi</button>
     </div>
 
-    <!-- 1. BİREYSEL KAYITLAR SEKMESİ -->
+    <!-- 1. BİREYSEL KAYITLAR -->
     <div id="bolum_bireysel" class="section active card">
         <h3>Bireysel Sporcu Ekle</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px;">
-            <input type="text" id="ad_b" placeholder="Ad Soyad" style="width: 180px;">
-            <input type="number" id="yas_b" placeholder="Yaş" style="width: 60px;">
-            <input type="tel" id="tel_b" placeholder="İletişim Numarası" style="width: 140px;">
-            <button onclick="kaydet('Bireysel', 'ad_b', 'yas_b', 'tel_b')">Bireysel Kaydet</button>
+        <div class="form-group">
+            <input type="text" id="ad_b" placeholder="Ad Soyad" style="flex: 2;">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <label style="font-size: 11px; color: #64748b;">Doğum Tarihi:</label>
+                <input type="date" id="dogum_b">
+            </div>
+            <input type="tel" id="tel_b" placeholder="Telefon Numarası" style="flex: 1;">
+            <button onclick="kaydet('Bireysel', 'ad_b', 'dogum_b', 'tel_b')">Sporcu Kaydet</button>
         </div>
-        <h3>Bireysel Sporcu Listesi</h3>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <h3>Bireysel Sporcu Listesi</h3>
+            <div id="bireysel_sayi" class="stats">Toplam: 0</div>
+        </div>
+        
+        <input type="text" class="search-box" placeholder="Bireysel listesinde ara..." onkeyup="filtrele('liste_bireysel', this.value)">
+        
         <table>
             <thead>
                 <tr>
                     <th>Ad Soyad</th>
-                    <th>Yaş</th>
+                    <th>Doğum Tarihi</th>
                     <th>İletişim</th>
                     <th>İşlem</th>
                 </tr>
@@ -61,21 +111,31 @@
         </table>
     </div>
 
-    <!-- 2. FUTBOL OKULU SEKMESİ -->
+    <!-- 2. FUTBOL OKULU -->
     <div id="bolum_okul" class="section card">
         <h3>Futbol Okulu Sporcusu Ekle</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px;">
-            <input type="text" id="ad_o" placeholder="Ad Soyad" style="width: 180px;">
-            <input type="number" id="yas_o" placeholder="Yaş" style="width: 60px;">
-            <input type="tel" id="tel_o" placeholder="İletişim Numarası" style="width: 140px;">
-            <button onclick="kaydet('Futbol Okulu', 'ad_o', 'yas_o', 'tel_o')">Okul Kaydet</button>
+        <div class="form-group">
+            <input type="text" id="ad_o" placeholder="Ad Soyad" style="flex: 2;">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <label style="font-size: 11px; color: #64748b;">Doğum Tarihi:</label>
+                <input type="date" id="dogum_o">
+            </div>
+            <input type="tel" id="tel_o" placeholder="Telefon Numarası" style="flex: 1;">
+            <button onclick="kaydet('Futbol Okulu', 'ad_o', 'dogum_o', 'tel_o')">Okula Kaydet</button>
         </div>
-        <h3>Futbol Okulu Listesi</h3>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <h3>Futbol Okulu Listesi</h3>
+            <div id="okul_sayi" class="stats">Toplam: 0</div>
+        </div>
+
+        <input type="text" class="search-box" placeholder="Futbol okulu listesinde ara..." onkeyup="filtrele('liste_okul', this.value)">
+
         <table>
             <thead>
                 <tr>
                     <th>Ad Soyad</th>
-                    <th>Yaş</th>
+                    <th>Doğum Tarihi</th>
                     <th>İletişim</th>
                     <th>İşlem</th>
                 </tr>
@@ -86,14 +146,50 @@
         </table>
     </div>
 
-    <!-- 3. ANTRENMAN ÇİZELGESİ SEKMESİ -->
-    <div id="bolum_antrenman" class="section card">
-        <h3>Antrenman Çizelgesi</h3>
-        <div style="display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px;">
-            <input type="date" id="tarih">
-            <input type="text" id="antNot" placeholder="Antrenman Notu" style="flex: 1; min-width: 200px;">
-            <button onclick="antEkle()">Antrenman Ekle</button>
+    <!-- 3. BOKS KULÜBÜ -->
+    <div id="bolum_boks" class="section card">
+        <h3>🥊 Boks Sporcusu Ekle</h3>
+        <div class="form-group">
+            <input type="text" id="ad_box" placeholder="Ad Soyad" style="flex: 2;">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+                <label style="font-size: 11px; color: #64748b;">Doğum Tarihi:</label>
+                <input type="date" id="dogum_box">
+            </div>
+            <input type="tel" id="tel_box" placeholder="Telefon Numarası" style="flex: 1;">
+            <button onclick="kaydet('Boks Kulübü', 'ad_box', 'dogum_box', 'tel_box')">Boksör Kaydet</button>
         </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <h3>Boks Kulübü Listesi</h3>
+            <div id="boks_sayi" class="stats">Toplam: 0</div>
+        </div>
+
+        <input type="text" class="search-box" placeholder="Boks listesinde ara..." onkeyup="filtrele('liste_boks', this.value)">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Ad Soyad</th>
+                    <th>Doğum Tarihi</th>
+                    <th>İletişim</th>
+                    <th>İşlem</th>
+                </tr>
+            </thead>
+            <tbody id="liste_boks">
+                <tr><td colspan="4" style="text-align: center;">Yükleniyor...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 4. ANTRENMAN ÇİZELGESİ -->
+    <div id="bolum_antrenman" class="section card">
+        <h3>Yeni Antrenman / Ders Ekle</h3>
+        <div class="form-group">
+            <input type="date" id="tarih">
+            <input type="text" id="antNot" placeholder="Branş / Antrenman Notu" style="flex: 1;">
+            <button onclick="antEkle()">Çizelgeye Ekle</button>
+        </div>
+        
         <h3>Planlanan Antrenmanlar</h3>
         <ul id="antListe" style="list-style-type: none; padding: 0;">
             <li style="padding: 8px; color: #666;">Yükleniyor...</li>
@@ -103,7 +199,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBnwQM8iQO9cn34npzJS56xMvpRl2Ni0eU",
@@ -116,7 +212,33 @@
 
     const db = getFirestore(initializeApp(firebaseConfig));
 
-    // Sekme Değiştirme Fonksiyonu
+    // Panel Şifresi
+    const PANEL_SIFRE = "1234";
+
+    // Şifre ile Giriş İşlemi
+    window.login = () => {
+        const pass = document.getElementById("passInput").value;
+        if (pass === PANEL_SIFRE) {
+            sessionStorage.setItem("logged_in", "true");
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("app-screen").style.display = "block";
+        } else {
+            alert("Hatalı şifre!");
+        }
+    };
+
+    window.logout = () => {
+        sessionStorage.removeItem("logged_in");
+        location.reload();
+    };
+
+    // Oturum Kontrolü
+    if (sessionStorage.getItem("logged_in") === "true") {
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("app-screen").style.display = "block";
+    }
+
+    // Sekmeler
     window.switchTab = (id, btn) => {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -124,89 +246,131 @@
         btn.classList.add('active');
     };
 
-    // Firebase'den Verileri Çek ve Listele
-    onSnapshot(collection(db, "sporcular"), (s) => {
-        let bHtml = "";
-        let oHtml = "";
-        let bSayi = 0;
-        let oSayi = 0;
+    // Tarihi GG.AA.YYYY Formatına Çevirme Fonksiyonu
+    const formatDate = (dateStr) => {
+        if (!dateStr) return '-';
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return dateStr;
+        return `${parts[2]}.${parts[1]}.${parts[0]}`;
+    };
 
-        s.forEach(d => {
-            let v = d.data();
-            let satir = `<tr>
-                <td>${v.ad || '-'}</td>
-                <td>${v.yas || '-'}</td>
+    // Sporcu Dinleme ve Listeleme
+    const sporcuQuery = query(collection(db, "sporcular"), orderBy("tarih", "desc"));
+    
+    onSnapshot(sporcuQuery, (snapshot) => {
+        let bHtml = "", oHtml = "", boxHtml = "";
+        let bCount = 0, oCount = 0, boxCount = 0;
+
+        snapshot.forEach(docSnap => {
+            let v = docSnap.data();
+            let id = docSnap.id;
+            
+            let row = `<tr>
+                <td><b>${v.ad || '-'}</b></td>
+                <td>${formatDate(v.dogumTarihi)}</td>
                 <td>${v.telefon || '-'}</td>
-                <td><button class="btn-delete" onclick="sil('${d.id}', 'sporcular')">Sil</button></td>
+                <td><button class="btn-delete" onclick="sil('${id}', 'sporcular')">Sil</button></td>
             </tr>`;
 
             if (v.tur === "Bireysel") {
-                bHtml += satir;
-                bSayi++;
+                bHtml += row;
+                bCount++;
             } else if (v.tur === "Futbol Okulu") {
-                oHtml += satir;
-                oSayi++;
+                oHtml += row;
+                oCount++;
+            } else if (v.tur === "Boks Kulübü") {
+                boxHtml += row;
+                boxCount++;
             }
         });
 
-        if (bSayi === 0) bHtml = `<tr><td colspan="4" style="text-align: center; color: #666;">Kayıt bulunmuyor.</td></tr>`;
-        if (oSayi === 0) oHtml = `<tr><td colspan="4" style="text-align: center; color: #666;">Kayıt bulunmuyor.</td></tr>`;
-
-        document.getElementById("liste_bireysel").innerHTML = bHtml;
-        document.getElementById("liste_okul").innerHTML = oHtml;
+        document.getElementById("liste_bireysel").innerHTML = bCount ? bHtml : `<tr><td colspan="4" style="text-align: center; color: #94a3b8;">Kayıtlı bireysel sporcu yok.</td></tr>`;
+        document.getElementById("liste_okul").innerHTML = oCount ? oHtml : `<tr><td colspan="4" style="text-align: center; color: #94a3b8;">Kayıtlı futbol okulu sporcusu yok.</td></tr>`;
+        document.getElementById("liste_boks").innerHTML = boxCount ? boxHtml : `<tr><td colspan="4" style="text-align: center; color: #94a3b8;">Kayıtlı boks sporcusu yok.</td></tr>`;
+        
+        document.getElementById("bireysel_sayi").innerText = `Toplam: ${bCount} Sporcu`;
+        document.getElementById("okul_sayi").innerText = `Toplam: ${oCount} Sporcu`;
+        document.getElementById("boks_sayi").innerText = `Toplam: ${boxCount} Sporcu`;
     });
 
-    window.kaydet = async (tur, adId, yasId, telId) => {
-        const ad = document.getElementById(adId).value;
-        const yas = document.getElementById(yasId).value;
-        const telefon = document.getElementById(telId).value;
+    // Sporcu Kaydet
+    window.kaydet = async (tur, adId, dogumId, telId) => {
+        const ad = document.getElementById(adId).value.trim();
+        const dogumTarihi = document.getElementById(dogumId).value;
+        const telefon = document.getElementById(telId).value.trim();
 
         if (!ad) {
-            alert("Lütfen ad soyad giriniz!");
+            alert("Lütfen Ad Soyad alanını doldurunuz!");
             return;
         }
 
-        await addDoc(collection(db, "sporcular"), { tur, ad, yas, telefon });
-        
-        // Kutuları temizle
-        document.getElementById(adId).value = "";
-        document.getElementById(yasId).value = "";
-        document.getElementById(telId).value = "";
+        try {
+            await addDoc(collection(db, "sporcular"), {
+                tur, ad, dogumTarihi, telefon,
+                tarih: serverTimestamp()
+            });
+            document.getElementById(adId).value = "";
+            document.getElementById(dogumId).value = "";
+            document.getElementById(telId).value = "";
+        } catch (e) {
+            alert("Hata oluştu: " + e.message);
+        }
     };
 
-    // Antrenman Çizelgesi
-    onSnapshot(collection(db, "antrenman"), (s) => {
-        let h = "";
-        if (s.empty) {
-            h = `<li style="padding: 8px; color: #666;">Planlanmış antrenman yok.</li>`;
+    // Antrenman Dinleme
+    const antrenmanQuery = query(collection(db, "antrenman"), orderBy("tarih", "asc"));
+    
+    onSnapshot(antrenmanQuery, (snapshot) => {
+        let html = "";
+        if (snapshot.empty) {
+            html = `<li style="padding: 12px; color: #94a3b8; text-align: center;">Planlanmış antrenman bulunmuyor.</li>`;
         } else {
-            s.forEach(d => {
-                let v = d.data();
-                h += `<li style="background: #f1f5f9; padding: 10px; margin-bottom: 5px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
-                    <span>📅 <b>${v.tarih || ''}</b> - ${v.not || ''}</span>
-                    <button class="btn-delete" onclick="sil('${d.id}', 'antrenman')">Sil</button>
+            snapshot.forEach(docSnap => {
+                let v = docSnap.data();
+                html += `<li style="background: #f8fafc; padding: 12px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                    <span>📅 <b>${formatDate(v.tarih)}</b> - ${v.not}</span>
+                    <button class="btn-delete" onclick="sil('${docSnap.id}', 'antrenman')">Sil</button>
                 </li>`;
             });
         }
-        document.getElementById("antListe").innerHTML = h;
+        document.getElementById("antListe").innerHTML = html;
     });
 
+    // Antrenman Ekle
     window.antEkle = async () => {
         const tarih = document.getElementById("tarih").value;
-        const not = document.getElementById("antNot").value;
+        const not = document.getElementById("antNot").value.trim();
+
         if (!tarih || !not) {
-            alert("Lütfen tarih ve not giriniz!");
+            alert("Lütfen tarih ve not alanını doldurunuz!");
             return;
         }
-        await addDoc(collection(db, "antrenman"), { tarih, not });
-        document.getElementById("tarih").value = "";
-        document.getElementById("antNot").value = "";
+
+        try {
+            await addDoc(collection(db, "antrenman"), { tarih, not });
+            document.getElementById("tarih").value = "";
+            document.getElementById("antNot").value = "";
+        } catch (e) {
+            alert("Hata oluştu: " + e.message);
+        }
     };
 
+    // Kayıt Silme
     window.sil = async (id, col) => {
-        if (confirm("Silmek istediğinize emin misiniz?")) {
+        if (confirm("Bu kaydı silmek istediğinize emin misiniz?")) {
             await deleteDoc(doc(db, col, id));
         }
+    };
+
+    // Canlı Arama/Filtreleme
+    window.filtrele = (tableBodyId, query) => {
+        const rows = document.querySelectorAll(`#${tableBodyId} tr`);
+        const filter = query.toLowerCase();
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(filter) ? "" : "none";
+        });
     };
 </script>
 </body>
