@@ -26,6 +26,10 @@
         button:hover { background: #059669; }
         .btn-logout { background: #ef4444; font-size: 12px; padding: 6px 12px; }
         .btn-logout:hover { background: #dc2626; }
+        .btn-pdf { background: #0284c7; }
+        .btn-pdf:hover { background: #0369a1; }
+        .btn-backup { background: #6366f1; }
+        .btn-backup:hover { background: #4f46e5; }
         .search-box { width: 100%; margin-bottom: 15px; }
         
         /* ÇİZELGE VE TABLO STİLLERİ (Görsele Uygun Net Sınırlar) */
@@ -46,6 +50,20 @@
         .btn-delete:hover { background: #dc2626; }
         .badge { background: #10b981; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
         .stats { display: flex; gap: 10px; margin-bottom: 15px; font-size: 14px; color: #64748b; }
+
+        /* Yazdırma / PDF Çıktı Ayarları */
+        @media print {
+            body { padding: 0; background: white; }
+            .tabs, .form-group, .search-box, .btn-logout, .badge, #login-screen, .header-card, button, select { display: none !important; }
+            .card { box-shadow: none; padding: 0; margin: 0; }
+            .section { display: block !important; }
+            #bolum_bireysel, #bolum_okul, #bolum_boks { display: none !important; }
+            #bolum_aidat { display: block !important; }
+            table, th, td { border: 1px solid #000 !important; }
+            th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; }
+            .month-cell.paid { background-color: #22c55e !important; color: white !important; -webkit-print-color-adjust: exact; }
+        }
+
         @media (max-width: 600px) {
             .form-group { flex-direction: column; }
             input { width: 100% !important; }
@@ -70,7 +88,8 @@
         <div>
             <h2 style="margin: 0;">🥊⚽ Spor Kulübü Yönetim Paneli</h2>
         </div>
-        <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-backup" onclick="yedekAl()" style="font-size: 12px; padding: 6px 12px;">💾 Veri Yedeği İndir</button>
             <span class="badge">Canlı Bağlantı</span>
             <button class="btn-logout" onclick="logout()">Çıkış Yap</button>
         </div>
@@ -197,9 +216,9 @@
 
     <!-- 4. AYLIK AİDAT ÇİZELGESİ -->
     <div id="bolum_aidat" class="section card">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; gap: 10px;">
             <h2 style="color: #dc2626; margin: 0; font-size: 20px;">SPOR KULÜBÜ AİDAT ÇİZELGESİ</h2>
-            <div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                 <b>Branş Filtrele: </b>
                 <select id="filtre_brans" onchange="aidatTablosunuGuncelle()" style="padding: 6px 12px; font-weight: bold;">
                     <option value="TUMU">TÜMÜ</option>
@@ -207,6 +226,7 @@
                     <option value="Boks Kulübü">Boks Kulübü</option>
                     <option value="Bireysel">Bireysel</option>
                 </select>
+                <button class="btn-pdf" onclick="window.print()" style="font-size: 13px; padding: 6px 14px;">📄 PDF İndir / Yazdır</button>
             </div>
         </div>
 
@@ -298,7 +318,7 @@
     let tumSporcular = [];
     const aylar = ["ocak", "subat", "mart", "nisan", "mayis", "haziran", "temmuz", "agustos", "eylul", "ekim", "kasim", "aralik"];
 
-    // Sporcu Dinleme
+    // Sporcu Dinleme (Sabit 'sporcular' Koleksiyonu)
     const sporcuQuery = query(collection(db, "sporcular"), orderBy("tarih", "desc"));
     
     onSnapshot(sporcuQuery, (snapshot) => {
@@ -427,7 +447,7 @@
         }
     };
 
-    // Filtreleme
+    // Canlı Filtreleme
     window.filtrele = (tableBodyId, query) => {
         const rows = document.querySelectorAll(`#${tableBodyId} tr`);
         const filter = query.toLowerCase();
@@ -436,6 +456,21 @@
             const text = row.textContent.toLowerCase();
             row.style.display = text.includes(filter) ? "" : "none";
         });
+    };
+
+    // Veri Yedekleme (JSON)
+    window.yedekAl = () => {
+        if (tumSporcular.length === 0) {
+            alert("Yedeklenecek veri bulunamadı!");
+            return;
+        }
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tumSporcular, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `sporcu_veri_yedegi_${new Date().toISOString().slice(0,10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
     };
 </script>
 </body>
