@@ -7,9 +7,9 @@
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8fafc; padding: 20px; color: #334155; margin: 0; }
-        .container { max-width: 1050px; margin: auto; }
+        .container { max-width: 1200px; margin: auto; }
         
-        /* Şifre Giriş Ekranı Styles */
+        /* Şifre Giriş Ekranı */
         #login-screen {
             max-width: 400px;
             margin: 80px auto;
@@ -31,16 +31,18 @@
         .btn-logout { background: #ef4444; font-size: 12px; padding: 6px 12px; }
         .btn-logout:hover { background: #dc2626; }
         .search-box { width: 100%; margin-bottom: 15px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; }
-        th { background: #f8fafc; color: #64748b; font-size: 13px; text-transform: uppercase; }
         
-        /* Ödeme Durumu Butonları */
-        .btn-pay { padding: 6px 12px; font-size: 12px; border: none; border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
-        .btn-paid { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-        .btn-paid:hover { background: #bbf7d0; }
-        .btn-unpaid { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
-        .btn-unpaid:hover { background: #fecaca; }
+        /* Tablo Stilleri */
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px 12px; border: 1px solid #e2e8f0; text-align: left; }
+        th { background: #f1f5f9; color: #475569; font-size: 13px; text-transform: uppercase; }
+        
+        /* Aidat Çizelgesi Matris Kutuları */
+        .month-cell { text-align: center; cursor: pointer; user-select: none; font-weight: bold; font-size: 16px; transition: background 0.2s; width: 60px; }
+        .month-cell.paid { background: #dcfce7; color: #166534; }
+        .month-cell.unpaid { background: #ffffff; color: #cbd5e1; }
+        .month-cell:hover { opacity: 0.8; }
 
         .btn-delete { background: #ef4444; padding: 6px 12px; font-size: 12px; color: white; border: none; border-radius: 4px; cursor: pointer; }
         .btn-delete:hover { background: #dc2626; }
@@ -81,7 +83,7 @@
         <button class="tab-btn active" onclick="switchTab('bolum_bireysel', this)">Bireysel Kayıtlar</button>
         <button class="tab-btn" onclick="switchTab('bolum_okul', this)">Futbol Okulu</button>
         <button class="tab-btn" onclick="switchTab('bolum_boks', this)">🥊 Boks Kulübü</button>
-        <button class="tab-btn" onclick="switchTab('bolum_antrenman', this)">Antrenman Çizelgesi</button>
+        <button class="tab-btn" onclick="switchTab('bolum_aidat', this)">📋 Aylık Aidat Çizelgesi</button>
     </div>
 
     <!-- 1. BİREYSEL KAYITLAR -->
@@ -104,20 +106,21 @@
         
         <input type="text" class="search-box" placeholder="Bireysel listesinde ara..." onkeyup="filtrele('liste_bireysel', this.value)">
         
-        <table>
-            <thead>
-                <tr>
-                    <th>Ad Soyad</th>
-                    <th>Doğum Tarihi</th>
-                    <th>İletişim</th>
-                    <th>Ödeme Durumu</th>
-                    <th>İşlem</th>
-                </tr>
-            </thead>
-            <tbody id="liste_bireysel">
-                <tr><td colspan="5" style="text-align: center;">Yükleniyor...</td></tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ad Soyad</th>
+                        <th>Doğum Tarihi</th>
+                        <th>İletişim</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody id="liste_bireysel">
+                    <tr><td colspan="4" style="text-align: center;">Yükleniyor...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- 2. FUTBOL OKULU -->
@@ -140,20 +143,21 @@
 
         <input type="text" class="search-box" placeholder="Futbol okulu listesinde ara..." onkeyup="filtrele('liste_okul', this.value)">
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Ad Soyad</th>
-                    <th>Doğum Tarihi</th>
-                    <th>İletişim</th>
-                    <th>Ödeme Durumu</th>
-                    <th>İşlem</th>
-                </tr>
-            </thead>
-            <tbody id="liste_okul">
-                <tr><td colspan="5" style="text-align: center;">Yükleniyor...</td></tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ad Soyad</th>
+                        <th>Doğum Tarihi</th>
+                        <th>İletişim</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody id="liste_okul">
+                    <tr><td colspan="4" style="text-align: center;">Yükleniyor...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- 3. BOKS KULÜBÜ -->
@@ -176,35 +180,63 @@
 
         <input type="text" class="search-box" placeholder="Boks listesinde ara..." onkeyup="filtrele('liste_boks', this.value)">
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Ad Soyad</th>
-                    <th>Doğum Tarihi</th>
-                    <th>İletişim</th>
-                    <th>Ödeme Durumu</th>
-                    <th>İşlem</th>
-                </tr>
-            </thead>
-            <tbody id="liste_boks">
-                <tr><td colspan="5" style="text-align: center;">Yükleniyor...</td></tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ad Soyad</th>
+                        <th>Doğum Tarihi</th>
+                        <th>İletişim</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody id="liste_boks">
+                    <tr><td colspan="4" style="text-align: center;">Yükleniyor...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- 4. ANTRENMAN ÇİZELGESİ -->
-    <div id="bolum_antrenman" class="section card">
-        <h3>Yeni Antrenman / Ders Ekle</h3>
-        <div class="form-group">
-            <input type="date" id="tarih">
-            <input type="text" id="antNot" placeholder="Branş / Antrenman Notu" style="flex: 1;">
-            <button onclick="antEkle()">Çizelgeye Ekle</button>
+    <!-- 4. AYLIK AİDAT ÇİZELGESİ (YENİ SEKMELER MATRIX) -->
+    <div id="bolum_aidat" class="section card">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px;">
+            <h3>📋 Sporcu Aylık Aidat Takip Çizelgesi</h3>
+            <div>
+                <select id="filtre_brans" onchange="aidatTablosunuGuncelle()" style="padding: 6px 12px;">
+                    <option value="TUMU">Tüm Sporcular</option>
+                    <option value="Futbol Okulu">Futbol Okulu</option>
+                    <option value="Boks Kulübü">Boks Kulübü</option>
+                    <option value="Bireysel">Bireysel</option>
+                </select>
+            </div>
         </div>
-        
-        <h3>Planlanan Antrenmanlar</h3>
-        <ul id="antListe" style="list-style-type: none; padding: 0;">
-            <li style="padding: 8px; color: #666;">Yükleniyor...</li>
-        </ul>
+        <p style="font-size: 12px; color: #64748b; margin-top: -10px;">Ödeme yapılan ayın kutusuna tıklayarak **Tik (✓)** ekleyebilir veya kaldırabilirsiniz.</p>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="min-width: 160px;">Ad Soyad</th>
+                        <th style="min-width: 110px;">Branş</th>
+                        <th>Oca</th>
+                        <th>Şub</th>
+                        <th>Mar</th>
+                        <th>Nis</th>
+                        <th>May</th>
+                        <th>Haz</th>
+                        <th>Tem</th>
+                        <th>Ağu</th>
+                        <th>Eyl</th>
+                        <th>Eki</th>
+                        <th>Kas</th>
+                        <th>Ara</th>
+                    </tr>
+                </thead>
+                <tbody id="liste_aidat">
+                    <tr><td colspan="14" style="text-align: center;">Yükleniyor...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -264,29 +296,26 @@
         return `${parts[2]}.${parts[1]}.${parts[0]}`;
     };
 
+    let tumSporcular = [];
+    const aylar = ["ocak", "subat", "mart", "nisan", "mayis", "haziran", "temmuz", "agustos", "eylul", "ekim", "kasim", "aralik"];
+
     // Sporcu Dinleme ve Listeleme
     const sporcuQuery = query(collection(db, "sporcular"), orderBy("tarih", "desc"));
     
     onSnapshot(sporcuQuery, (snapshot) => {
         let bHtml = "", oHtml = "", boxHtml = "";
         let bCount = 0, oCount = 0, boxCount = 0;
+        tumSporcular = [];
 
         snapshot.forEach(docSnap => {
             let v = docSnap.data();
             let id = docSnap.id;
-            
-            // Ödeme durumu kontrolü
-            let isPaid = v.odemeDurumu === true;
-            let payBtnClass = isPaid ? "btn-pay btn-paid" : "btn-pay btn-unpaid";
-            let payBtnText = isPaid ? "✓ Ödendi" : "✗ Ödenmedi";
+            tumSporcular.push({ id, ...v });
 
             let row = `<tr>
                 <td><b>${v.ad || '-'}</b></td>
                 <td>${formatDate(v.dogumTarihi)}</td>
                 <td>${v.telefon || '-'}</td>
-                <td>
-                    <button class="${payBtnClass}" onclick="toggleOdeme('${id}', ${isPaid})">${payBtnText}</button>
-                </td>
                 <td><button class="btn-delete" onclick="sil('${id}', 'sporcular')">Sil</button></td>
             </tr>`;
 
@@ -302,23 +331,61 @@
             }
         });
 
-        document.getElementById("liste_bireysel").innerHTML = bCount ? bHtml : `<tr><td colspan="5" style="text-align: center; color: #94a3b8;">Kayıtlı bireysel sporcu yok.</td></tr>`;
-        document.getElementById("liste_okul").innerHTML = oCount ? oHtml : `<tr><td colspan="5" style="text-align: center; color: #94a3b8;">Kayıtlı futbol okulu sporcusu yok.</td></tr>`;
-        document.getElementById("liste_boks").innerHTML = boxCount ? boxHtml : `<tr><td colspan="5" style="text-align: center; color: #94a3b8;">Kayıtlı boks sporcusu yok.</td></tr>`;
+        document.getElementById("liste_bireysel").innerHTML = bCount ? bHtml : `<tr><td colspan="4" style="text-align: center; color: #94a3b8;">Kayıtlı bireysel sporcu yok.</td></tr>`;
+        document.getElementById("liste_okul").innerHTML = oCount ? oHtml : `<tr><td colspan="4" style="text-align: center; color: #94a3b8;">Kayıtlı futbol okulu sporcusu yok.</td></tr>`;
+        document.getElementById("liste_boks").innerHTML = boxCount ? boxHtml : `<tr><td colspan="4" style="text-align: center; color: #94a3b8;">Kayıtlı boks sporcusu yok.</td></tr>`;
         
         document.getElementById("bireysel_sayi").innerText = `Toplam: ${bCount} Sporcu`;
         document.getElementById("okul_sayi").innerText = `Toplam: ${oCount} Sporcu`;
         document.getElementById("boks_sayi").innerText = `Toplam: ${boxCount} Sporcu`;
+
+        aidatTablosunuGuncelle();
     });
 
-    // Ödeme Durumunu Değiştirme
-    window.toggleOdeme = async (id, mevcutDurum) => {
+    // Aidat Çizelgesini Oluşturma Fonksiyonu
+    window.aidatTablosunuGuncelle = () => {
+        const secilenBrans = document.getElementById("filtre_brans").value;
+        let html = "";
+        let filtreliListe = tumSporcular;
+
+        if (secilenBrans !== "TUMU") {
+            filtreliListe = tumSporcular.filter(s => s.tur === secilenBrans);
+        }
+
+        if (filtreliListe.length === 0) {
+            document.getElementById("liste_aidat").innerHTML = `<tr><td colspan="14" style="text-align: center; color: #94a3b8;">Gösterilecek sporcu kaydı yok.</td></tr>`;
+            return;
+        }
+
+        filtreliListe.forEach(s => {
+            let aidatData = s.aidat || {};
+            
+            html += `<tr>
+                <td><b>${s.ad || '-'}</b></td>
+                <td><span style="font-size: 11px; background: #e2e8f0; padding: 3px 8px; border-radius: 4px;">${s.tur}</span></td>`;
+
+            aylar.forEach(ay => {
+                let isPaid = aidatData[ay] === true;
+                let cellClass = isPaid ? "month-cell paid" : "month-cell unpaid";
+                let cellText = isPaid ? "✓" : "-";
+
+                html += `<td class="${cellClass}" onclick="aidatDurumDegistir('${s.id}', '${ay}', ${isPaid})">${cellText}</td>`;
+            });
+
+            html += `</tr>`;
+        });
+
+        document.getElementById("liste_aidat").innerHTML = html;
+    };
+
+    // Aidat Ayını Güncelleme (Tik koyma / kaldırma)
+    window.aidatDurumDegistir = async (sporcuId, ay, mevcutDurum) => {
         try {
-            await updateDoc(doc(db, "sporcular", id), {
-                odemeDurumu: !mevcutDurum
+            await updateDoc(doc(db, "sporcular", sporcuId), {
+                [`aidat.${ay}`]: !mevcutDurum
             });
         } catch (e) {
-            alert("Ödeme durumu güncellenirken hata oluştu: " + e.message);
+            alert("Güncellenirken hata oluştu: " + e.message);
         }
     };
 
@@ -336,50 +403,12 @@
         try {
             await addDoc(collection(db, "sporcular"), {
                 tur, ad, dogumTarihi, telefon,
-                odemeDurumu: false, // Varsayılan ödenmedi
+                aidat: {}, // Boş aidat objesi
                 tarih: serverTimestamp()
             });
             document.getElementById(adId).value = "";
             document.getElementById(dogumId).value = "";
             document.getElementById(telId).value = "";
-        } catch (e) {
-            alert("Hata oluştu: " + e.message);
-        }
-    };
-
-    // Antrenman Dinleme
-    const antrenmanQuery = query(collection(db, "antrenman"), orderBy("tarih", "asc"));
-    
-    onSnapshot(antrenmanQuery, (snapshot) => {
-        let html = "";
-        if (snapshot.empty) {
-            html = `<li style="padding: 12px; color: #94a3b8; text-align: center;">Planlanmış antrenman bulunmuyor.</li>`;
-        } else {
-            snapshot.forEach(docSnap => {
-                let v = docSnap.data();
-                html += `<li style="background: #f8fafc; padding: 12px; margin-bottom: 8px; border-radius: 6px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-                    <span>📅 <b>${formatDate(v.tarih)}</b> - ${v.not}</span>
-                    <button class="btn-delete" onclick="sil('${docSnap.id}', 'antrenman')">Sil</button>
-                </li>`;
-            });
-        }
-        document.getElementById("antListe").innerHTML = html;
-    });
-
-    // Antrenman Ekle
-    window.antEkle = async () => {
-        const tarih = document.getElementById("tarih").value;
-        const not = document.getElementById("antNot").value.trim();
-
-        if (!tarih || !not) {
-            alert("Lütfen tarih ve not alanını doldurunuz!");
-            return;
-        }
-
-        try {
-            await addDoc(collection(db, "antrenman"), { tarih, not });
-            document.getElementById("tarih").value = "";
-            document.getElementById("antNot").value = "";
         } catch (e) {
             alert("Hata oluştu: " + e.message);
         }
