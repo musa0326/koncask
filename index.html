@@ -9,7 +9,6 @@
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8fafc; padding: 20px; color: #334155; margin: 0; }
         .container { max-width: 1250px; margin: auto; }
         
-        /* Şifre Ekranı */
         #login-screen { max-width: 400px; margin: 80px auto; text-align: center; }
         
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
@@ -26,13 +25,12 @@
         button:hover { background: #059669; }
         .btn-logout { background: #ef4444; font-size: 12px; padding: 6px 12px; }
         .btn-logout:hover { background: #dc2626; }
-        .btn-pdf { background: #0284c7; }
+        .btn-pdf { background: #0284c7; color: white; font-weight: bold; }
         .btn-pdf:hover { background: #0369a1; }
         .btn-backup { background: #6366f1; }
         .btn-backup:hover { background: #4f46e5; }
         .search-box { width: 100%; margin-bottom: 15px; }
         
-        /* ÇİZELGE VE TABLO STİLLERİ (Görsele Uygun Net Sınırlar) */
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
         table, th, td { border: 1px solid #94a3b8; }
@@ -40,7 +38,6 @@
         th { background: #e2e8f0; color: #1e293b; font-weight: bold; text-transform: uppercase; }
         .text-left { text-align: left !important; }
         
-        /* Aidat Tik Kutuları */
         .month-cell { cursor: pointer; user-select: none; font-weight: bold; font-size: 15px; width: 45px; transition: all 0.1s; }
         .month-cell.paid { background: #22c55e; color: white; }
         .month-cell.unpaid { background: #ffffff; color: #cbd5e1; }
@@ -51,7 +48,6 @@
         .badge { background: #10b981; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
         .stats { display: flex; gap: 10px; margin-bottom: 15px; font-size: 14px; color: #64748b; }
 
-        /* Yazdırma / PDF Çıktı Ayarları */
         @media print {
             body { padding: 0; background: white; }
             .tabs, .form-group, .search-box, .btn-logout, .badge, #login-screen, .header-card, button, select { display: none !important; }
@@ -88,9 +84,10 @@
         <div>
             <h2 style="margin: 0;">🥊⚽ Spor Kulübü Yönetim Paneli</h2>
         </div>
+        <!-- PDF VE YEDEK BUTONLARI ARTIK EN ÜSTTE SABİT -->
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <button class="btn-pdf" onclick="window.print()" style="font-size: 12px; padding: 6px 12px;">📄 PDF İndir / Yazdır</button>
             <button class="btn-backup" onclick="yedekAl()" style="font-size: 12px; padding: 6px 12px;">💾 Veri Yedeği İndir</button>
-            <span class="badge">Canlı Bağlantı</span>
             <button class="btn-logout" onclick="logout()">Çıkış Yap</button>
         </div>
     </div>
@@ -218,7 +215,7 @@
     <div id="bolum_aidat" class="section card">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 15px; gap: 10px;">
             <h2 style="color: #dc2626; margin: 0; font-size: 20px;">SPOR KULÜBÜ AİDAT ÇİZELGESİ</h2>
-            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div>
                 <b>Branş Filtrele: </b>
                 <select id="filtre_brans" onchange="aidatTablosunuGuncelle()" style="padding: 6px 12px; font-weight: bold;">
                     <option value="TUMU">TÜMÜ</option>
@@ -226,7 +223,6 @@
                     <option value="Boks Kulübü">Boks Kulübü</option>
                     <option value="Bireysel">Bireysel</option>
                 </select>
-                <button class="btn-pdf" onclick="window.print()" style="font-size: 13px; padding: 6px 14px;">📄 PDF İndir / Yazdır</button>
             </div>
         </div>
 
@@ -274,10 +270,8 @@
 
     const db = getFirestore(initializeApp(firebaseConfig));
 
-    // Panel Şifresi
     const PANEL_SIFRE = "1234";
 
-    // Şifre Giriş
     window.login = () => {
         const pass = document.getElementById("passInput").value;
         if (pass === PANEL_SIFRE) {
@@ -299,7 +293,6 @@
         document.getElementById("app-screen").style.display = "block";
     }
 
-    // Sekmeler
     window.switchTab = (id, btn) => {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -307,7 +300,6 @@
         btn.classList.add('active');
     };
 
-    // Tarih Formatlama (GG.AA.YYYY)
     const formatDate = (dateStr) => {
         if (!dateStr) return '-';
         const parts = dateStr.split('-');
@@ -318,7 +310,6 @@
     let tumSporcular = [];
     const aylar = ["ocak", "subat", "mart", "nisan", "mayis", "haziran", "temmuz", "agustos", "eylul", "ekim", "kasim", "aralik"];
 
-    // Sporcu Dinleme (Sabit 'sporcular' Koleksiyonu)
     const sporcuQuery = query(collection(db, "sporcular"), orderBy("tarih", "desc"));
     
     onSnapshot(sporcuQuery, (snapshot) => {
@@ -361,7 +352,6 @@
         aidatTablosunuGuncelle();
     });
 
-    // Aidat Tablosunu Çizme
     window.aidatTablosunuGuncelle = () => {
         const secilenBrans = document.getElementById("filtre_brans").value;
         let html = "";
@@ -398,7 +388,6 @@
         document.getElementById("liste_aidat").innerHTML = html;
     };
 
-    // Aidat Güncelleme
     window.aidatDurumDegistir = async (sporcuId, ay, mevcutDurum) => {
         try {
             const sporcuRef = doc(db, "sporcular", sporcuId);
@@ -415,7 +404,6 @@
         }
     };
 
-    // Sporcu Kaydet
     window.kaydet = async (tur, adId, dogumId, telId) => {
         const ad = document.getElementById(adId).value.trim();
         const dogumTarihi = document.getElementById(dogumId).value;
@@ -440,14 +428,12 @@
         }
     };
 
-    // Kayıt Silme
     window.sil = async (id, col) => {
         if (confirm("Bu kaydı silmek istediğinize emin misiniz?")) {
             await deleteDoc(doc(db, col, id));
         }
     };
 
-    // Canlı Filtreleme
     window.filtrele = (tableBodyId, query) => {
         const rows = document.querySelectorAll(`#${tableBodyId} tr`);
         const filter = query.toLowerCase();
@@ -458,7 +444,6 @@
         });
     };
 
-    // Veri Yedekleme (JSON)
     window.yedekAl = () => {
         if (tumSporcular.length === 0) {
             alert("Yedeklenecek veri bulunamadı!");
