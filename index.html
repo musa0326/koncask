@@ -7,7 +7,7 @@
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f8fafc; padding: 20px; color: #334155; margin: 0; }
-        .container { max-width: 1000px; margin: auto; }
+        .container { max-width: 1050px; margin: auto; }
         
         /* Şifre Giriş Ekranı Styles */
         #login-screen {
@@ -34,6 +34,14 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; }
         th { background: #f8fafc; color: #64748b; font-size: 13px; text-transform: uppercase; }
+        
+        /* Ödeme Durumu Butonları */
+        .btn-pay { padding: 6px 12px; font-size: 12px; border: none; border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
+        .btn-paid { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .btn-paid:hover { background: #bbf7d0; }
+        .btn-unpaid { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .btn-unpaid:hover { background: #fecaca; }
+
         .btn-delete { background: #ef4444; padding: 6px 12px; font-size: 12px; color: white; border: none; border-radius: 4px; cursor: pointer; }
         .btn-delete:hover { background: #dc2626; }
         .badge { background: #10b981; color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
@@ -48,7 +56,7 @@
 
 <!-- GİRİŞ EKRANI -->
 <div id="login-screen" class="card">
-    <h2>🔒 Paneli Girişi</h2>
+    <h2>🔒 Panel Girişi</h2>
     <p style="color: #64748b; font-size: 14px;">Lütfen devam etmek için yönetim şifresini giriniz.</p>
     <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
         <input type="password" id="passInput" placeholder="Şifre" onkeypress="if(event.key==='Enter') login()">
@@ -56,7 +64,7 @@
     </div>
 </div>
 
-<!-- YÖNETİM PANELİ (Giriş Yapılınca Açılır) -->
+<!-- YÖNETİM PANELİ -->
 <div id="app-screen" class="container" style="display: none;">
     <div class="card header-card">
         <div>
@@ -102,11 +110,12 @@
                     <th>Ad Soyad</th>
                     <th>Doğum Tarihi</th>
                     <th>İletişim</th>
+                    <th>Ödeme Durumu</th>
                     <th>İşlem</th>
                 </tr>
             </thead>
             <tbody id="liste_bireysel">
-                <tr><td colspan="4" style="text-align: center;">Yükleniyor...</td></tr>
+                <tr><td colspan="5" style="text-align: center;">Yükleniyor...</td></tr>
             </tbody>
         </table>
     </div>
@@ -137,11 +146,12 @@
                     <th>Ad Soyad</th>
                     <th>Doğum Tarihi</th>
                     <th>İletişim</th>
+                    <th>Ödeme Durumu</th>
                     <th>İşlem</th>
                 </tr>
             </thead>
             <tbody id="liste_okul">
-                <tr><td colspan="4" style="text-align: center;">Yükleniyor...</td></tr>
+                <tr><td colspan="5" style="text-align: center;">Yükleniyor...</td></tr>
             </tbody>
         </table>
     </div>
@@ -172,11 +182,12 @@
                     <th>Ad Soyad</th>
                     <th>Doğum Tarihi</th>
                     <th>İletişim</th>
+                    <th>Ödeme Durumu</th>
                     <th>İşlem</th>
                 </tr>
             </thead>
             <tbody id="liste_boks">
-                <tr><td colspan="4" style="text-align: center;">Yükleniyor...</td></tr>
+                <tr><td colspan="5" style="text-align: center;">Yükleniyor...</td></tr>
             </tbody>
         </table>
     </div>
@@ -199,7 +210,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBnwQM8iQO9cn34npzJS56xMvpRl2Ni0eU",
@@ -215,7 +226,7 @@
     // Panel Şifresi
     const PANEL_SIFRE = "1234";
 
-    // Şifre ile Giriş İşlemi
+    // Şifre Giriş
     window.login = () => {
         const pass = document.getElementById("passInput").value;
         if (pass === PANEL_SIFRE) {
@@ -232,7 +243,6 @@
         location.reload();
     };
 
-    // Oturum Kontrolü
     if (sessionStorage.getItem("logged_in") === "true") {
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("app-screen").style.display = "block";
@@ -246,7 +256,7 @@
         btn.classList.add('active');
     };
 
-    // Tarihi GG.AA.YYYY Formatına Çevirme Fonksiyonu
+    // Tarih Formatlama (GG.AA.YYYY)
     const formatDate = (dateStr) => {
         if (!dateStr) return '-';
         const parts = dateStr.split('-');
@@ -265,10 +275,18 @@
             let v = docSnap.data();
             let id = docSnap.id;
             
+            // Ödeme durumu kontrolü
+            let isPaid = v.odemeDurumu === true;
+            let payBtnClass = isPaid ? "btn-pay btn-paid" : "btn-pay btn-unpaid";
+            let payBtnText = isPaid ? "✓ Ödendi" : "✗ Ödenmedi";
+
             let row = `<tr>
                 <td><b>${v.ad || '-'}</b></td>
                 <td>${formatDate(v.dogumTarihi)}</td>
                 <td>${v.telefon || '-'}</td>
+                <td>
+                    <button class="${payBtnClass}" onclick="toggleOdeme('${id}', ${isPaid})">${payBtnText}</button>
+                </td>
                 <td><button class="btn-delete" onclick="sil('${id}', 'sporcular')">Sil</button></td>
             </tr>`;
 
@@ -284,14 +302,25 @@
             }
         });
 
-        document.getElementById("liste_bireysel").innerHTML = bCount ? bHtml : `<tr><td colspan="4" style="text-align: center; color: #94a3b8;">Kayıtlı bireysel sporcu yok.</td></tr>`;
-        document.getElementById("liste_okul").innerHTML = oCount ? oHtml : `<tr><td colspan="4" style="text-align: center; color: #94a3b8;">Kayıtlı futbol okulu sporcusu yok.</td></tr>`;
-        document.getElementById("liste_boks").innerHTML = boxCount ? boxHtml : `<tr><td colspan="4" style="text-align: center; color: #94a3b8;">Kayıtlı boks sporcusu yok.</td></tr>`;
+        document.getElementById("liste_bireysel").innerHTML = bCount ? bHtml : `<tr><td colspan="5" style="text-align: center; color: #94a3b8;">Kayıtlı bireysel sporcu yok.</td></tr>`;
+        document.getElementById("liste_okul").innerHTML = oCount ? oHtml : `<tr><td colspan="5" style="text-align: center; color: #94a3b8;">Kayıtlı futbol okulu sporcusu yok.</td></tr>`;
+        document.getElementById("liste_boks").innerHTML = boxCount ? boxHtml : `<tr><td colspan="5" style="text-align: center; color: #94a3b8;">Kayıtlı boks sporcusu yok.</td></tr>`;
         
         document.getElementById("bireysel_sayi").innerText = `Toplam: ${bCount} Sporcu`;
         document.getElementById("okul_sayi").innerText = `Toplam: ${oCount} Sporcu`;
         document.getElementById("boks_sayi").innerText = `Toplam: ${boxCount} Sporcu`;
     });
+
+    // Ödeme Durumunu Değiştirme
+    window.toggleOdeme = async (id, mevcutDurum) => {
+        try {
+            await updateDoc(doc(db, "sporcular", id), {
+                odemeDurumu: !mevcutDurum
+            });
+        } catch (e) {
+            alert("Ödeme durumu güncellenirken hata oluştu: " + e.message);
+        }
+    };
 
     // Sporcu Kaydet
     window.kaydet = async (tur, adId, dogumId, telId) => {
@@ -307,6 +336,7 @@
         try {
             await addDoc(collection(db, "sporcular"), {
                 tur, ad, dogumTarihi, telefon,
+                odemeDurumu: false, // Varsayılan ödenmedi
                 tarih: serverTimestamp()
             });
             document.getElementById(adId).value = "";
