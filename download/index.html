@@ -3,61 +3,113 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#12392e">
-  <meta name="description" content="Sekerspor Android uygulamasını güvenli şekilde indirin. Futbol kayıtları ve aidat takibi.">
-  <title>Sekerspor Android Uygulaması — APK İndir</title>
-  <style>
-    :root { color-scheme: light; --forest:#12392e; --deep:#0b2a23; --lime:#c8e878; --cream:#f5f2e6; --paper:#fffef9; --ink:#17342b; --muted:#65736a; }
-    * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; background:var(--cream); color:var(--ink); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
-    header { min-height:68px; padding:14px clamp(18px,5vw,56px); display:flex; align-items:center; gap:12px; background:var(--deep); color:white; }
-    header img { width:40px; height:40px; object-fit:contain; border-radius:50%; background:var(--paper); }
-    header strong { letter-spacing:.09em; font-size:.95rem; }
-    main { width:min(920px, calc(100% - 32px)); margin:clamp(26px,7vh,76px) auto; }
-    .card { display:grid; grid-template-columns: minmax(0,1.25fr) minmax(220px,.75fr); gap:clamp(26px,6vw,60px); align-items:center; padding:clamp(24px,6vw,58px); border:1px solid #e2e2d6; border-radius:28px; background:var(--paper); box-shadow:0 20px 55px #12392e12; }
-    .eyebrow { margin:0 0 12px; color:#52745a; font-size:.8rem; font-weight:750; letter-spacing:.15em; text-transform:uppercase; }
-    h1 { margin:0; color:var(--deep); font-size:clamp(2rem,5vw,3.5rem); line-height:1.03; letter-spacing:-.045em; }
-    .lede { max-width:48ch; margin:18px 0 24px; color:var(--muted); font-size:1.06rem; line-height:1.7; }
-    .version { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid #dce9bd; border-radius:999px; background:#f3f8e8; color:var(--forest); font-size:.88rem; font-weight:700; }
-    .button { display:inline-flex; justify-content:center; align-items:center; gap:10px; min-height:56px; margin:22px 0 10px; padding:0 24px; border:0; border-radius:14px; background:#087847; color:#fff; font-size:1.05rem; font-weight:750; text-decoration:none; box-shadow:0 8px 18px #08784728; }
-    .button:hover { background:#06673d; }
-    .small { margin:4px 0 0; color:var(--muted); font-size:.88rem; line-height:1.55; }
-    .crest { display:flex; align-items:center; justify-content:center; min-height:250px; padding:24px; border-radius:24px; background:radial-gradient(circle at 50% 35%, #e7f0cf 0, #f7f7eb 58%, #eff0e4 100%); }
-    .crest img { width:min(100%,250px); height:auto; object-fit:contain; }
-    .steps { margin:24px 0 0; padding:22px clamp(18px,4vw,34px); border-radius:20px; background:#e8eddd; }
-    .steps h2 { margin:0 0 12px; color:var(--deep); font-size:1rem; }
-    .steps ol { margin:0; padding-left:20px; color:#52645a; line-height:1.8; }
-    footer { padding:8px 18px 34px; color:#748078; text-align:center; font-size:.82rem; }
-    @media(max-width:680px) { .card { grid-template-columns:1fr; } .crest { min-height:180px; grid-row:1; } .crest img { width:170px; } }
-  </style>
-</head>
+  <meta name="theme-color" content="#073e2b">
+  <meta name="description" content="Sekerspor Android uygulamasını indirin. Futbol kayıtları ve aidat çizelgesi cebinizde.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Sekerspor — Kulüp cebinizde">
+  <meta property="og:description" content="Sekerspor Android uygulamasını indirip kulüp panelinize telefonunuzdan ulaşın.">
+  <meta property="og:image" content="https://files.manuscdn.com/user_upload_by_module/session_file/310519664003002589/QFVLzwJpxHhcqPuA.jpg">
+  <title>Sekerspor — Android Uygulaması</title>
+  <link rel="icon" type="image/png" href="assets/sekerspor-icon.png">
+  <link rel="stylesheet" href="styles.css">
+<link rel="canonical" href="https://musa0326.github.io/koncask/download/" /></head>
 <body>
-  <header>
-    <img src="../sekerspor-logo.png" alt="Sekerspor arması">
-    <strong>ŞEKER SPOR · ESKİŞEHİR</strong>
+  <header class="site-header">
+    <a class="brand" href="#ust" aria-label="Sekerspor ana sayfa">
+      <img class="brand-mark" src="assets/sekerspor-icon.png" alt="">
+      <span class="brand-name">SEKER<span>SPOR</span></span>
+    </a>
+    <nav aria-label="Ana gezinme">
+      <a class="nav-link" href="#uygulama">Uygulama</a>
+      <a class="nav-link" href="../">Yönetim paneli</a>
+      <a class="nav-cta" href="#indir">APK’yı indir <span aria-hidden="true">↓</span></a>
+    </nav>
   </header>
-  <main>
-    <section class="card" aria-labelledby="title">
-      <div>
-        <p class="eyebrow">Kulübün cebinde</p>
-        <h1 id="title">Sekerspor<br>Android uygulaması</h1>
-        <p class="lede">Futbol kayıtları ve aidat çizelgesine telefonundan ulaş. İndirmek için aşağıdaki düğmeye dokun.</p>
-        <span class="version">Android 7.0+ · Sürüm 1.1.4</span><br>
-        <a class="button" href="./Sekerspor-1.1.4.apk" download="Sekerspor-1.1.4.apk" type="application/vnd.android.package-archive">APK’yı indir <span aria-hidden="true">↓</span></a>
-        <p class="small">Dosya adı: <strong>Sekerspor-1.1.4.apk</strong></p>
+
+  <main id="ust">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-lines" aria-hidden="true"></div>
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-dot"></span> ESKİŞEHİR · 1949’DAN BERİ</p>
+        <p class="kicker">SEKERSPOR ANDROID UYGULAMASI</p>
+        <h1 id="hero-title">Kulübün,<br><span>cebinde.</span></h1>
+        <p class="hero-description">Futbol okulu kayıtları ve aylık aidat çizelgesi — Sekerspor yönetim paneline telefonundan ulaş.</p>
+        <a class="download-button" href="./Sekerspor-1.1.4.apk" download="Sekerspor-1.1.4.apk" type="application/vnd.android.package-archive">
+          <span class="download-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M5 17.5v2A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="download-label"><strong>APK’yı indir</strong><small>Android uygulama dosyası</small></span>
+          <span class="download-arrow" aria-hidden="true">↗</span>
+        </a>
+        <div class="app-facts" aria-label="Uygulama bilgileri">
+          <span><i class="fact-check" aria-hidden="true">✓</i> Android 7.0+</span>
+          <span class="fact-divider" aria-hidden="true"></span>
+          <span>Futbol + aidat · Sürüm 1.1.4</span>
+          <span class="fact-divider" aria-hidden="true"></span>
+          <span>Yaklaşık 1 MB</span>
+        </div>
+        <p class="hero-note">Yeni sürümde futbol kayıtları ve aidatlar, yetkili hesapla giriş yapan cihazlar arasında eşitlenir. Kurulum için indirilen APK’ya dokunup <b>Yükle</b>’yi seçin; eşitleme için internet gerekir.</p>
       </div>
-      <div class="crest"><img src="../sekerspor-logo.png" alt="Şeker Spor Kulübü arması"></div>
+
+      <div class="hero-art" aria-label="Sekerspor Spor Kulübü arması">
+        <div class="orbit orbit-one" aria-hidden="true"></div>
+        <div class="orbit orbit-two" aria-hidden="true"></div>
+        <div class="crest-frame">
+          <img src="assets/sekerspor-logo.jpg" alt="Şeker Spor Kulübü, Eskişehir 1949 arması" width="989" height="1006">
+        </div>
+        <div class="art-caption"><span class="caption-rule"></span><span>ESKİŞEHİR’İN RENKLERİ</span></div>
+      </div>
+      <div class="hero-index" aria-hidden="true">01 / 01</div>
     </section>
-    <section class="steps" aria-labelledby="steps-title">
-      <h2 id="steps-title">Kurulum</h2>
-      <ol>
-        <li>APK’yı indirip Chrome’un <strong>İndirilenler</strong> bölümünden aç.</li>
-        <li>Android sorarsa bu kaynaktan yüklemeye izin ver ve <strong>Yükle</strong>’ye dokun.</li>
-        <li>Güncelleme yapıyorsan eski uygulamayı kaldırma; APK’yı mevcut uygulamanın üzerine yükle.</li>
-      </ol>
-      <p class="small">İndirme veya kurulum bağlantısı çalışmazsa başka bir Wi‑Fi/mobil ağ üzerinden tekrar deneyebilirsin.</p>
+
+    <section class="app-section" id="uygulama" aria-labelledby="app-title">
+      <div class="section-intro">
+        <p class="section-label">KULÜBÜN YANINDA</p>
+        <h2 id="app-title">Futbol kayıtları.<br>Aidat takibi.</h2>
+      </div>
+      <div class="section-details">
+        <p>Sekerspor Android uygulaması, futbol okulu kayıtlarını ve futbolcuların aylık aidat çizelgesini tek yerde gösterir.</p>
+        <div class="feature-list">
+          <div class="feature-item"><span class="feature-number">01</span><span>Futbol okulu kayıtları</span><span class="feature-mark" aria-hidden="true">↗</span></div>
+          <div class="feature-item"><span class="feature-number">02</span><span>Futbol aidat çizelgesi</span><span class="feature-mark" aria-hidden="true">↗</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="install-section" id="indir" aria-labelledby="install-title">
+      <div class="install-emblem" aria-hidden="true"><img src="assets/sekerspor-icon.png" alt=""></div>
+      <div class="install-copy">
+        <p class="section-label">TELEFONUNA KUR</p>
+        <h2 id="install-title">Takımına<br>bir adım yakın.</h2>
+        <p>APK dosyasını indir. İndirilenler’den açıp kurulum adımlarını tamamla.</p>
+      </div>
+      <div class="install-action">
+        <a class="download-button download-button-light" href="./Sekerspor-1.1.4.apk" download="Sekerspor-1.1.4.apk" type="application/vnd.android.package-archive">
+          <span class="download-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M5 17.5v2A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="download-label"><strong>Sekerspor-1.1.4.apk</strong><small>Dosyayı telefona indir</small></span>
+          <span class="download-arrow" aria-hidden="true">↓</span>
+        </a>
+        <p class="download-footnote">Android 7.0 ve üzeri · Ortak çevrimiçi eşitleme</p>
+      </div>
+    </section>
+
+    <section class="steps-section" aria-labelledby="steps-title">
+      <p class="section-label">KURULUM REHBERİ</p>
+      <h2 id="steps-title">Üç kısa adım.</h2>
+      <div class="steps-list">
+        <article class="step"><span class="step-no">01</span><div><h3>APK’yı indir</h3><p>“Sekerspor-1.1.4.apk” düğmesine dokun.</p></div></article>
+        <article class="step"><span class="step-no">02</span><div><h3>Dosyayı aç</h3><p>Tarayıcının veya Dosyalar uygulamasının İndirilenler bölümüne git.</p></div></article>
+        <article class="step"><span class="step-no">03</span><div><h3>Yükle ve başlat</h3><p>Android sorarsa bu kaynaktan yüklemeye izin ver, sonra “Yükle”ye dokun.</p></div></article>
+      </div>
+      <p class="system-note"><span aria-hidden="true">ⓘ</span> Android güvenliği gereği uygulama sessizce kurulamaz; indirme tamamlandıktan sonra kurulum onayı gerekir. Uygulama kulüp panelini internet üzerinden açar.</p>
     </section>
   </main>
-  <footer>Şeker Spor Kulübü · Eskişehir · 1949</footer>
-</body>
+
+  <footer class="site-footer">
+    <a class="footer-brand" href="#ust">SEKER<span>SPOR</span></a>
+    <span>Eskişehir · 1949</span>
+    <a class="back-top" href="#ust">Başa dön ↑</a>
+  </footer>
+<manus-content-root></manus-content-root>
+		</body>
 </html>
